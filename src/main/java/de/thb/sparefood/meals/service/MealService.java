@@ -22,12 +22,22 @@ public class MealService {
   }
 
   @Transactional
-  public void addMeal(Meal meal) {
+  public Meal addMeal(Meal meal) {
     mealRepository.persist(meal);
+    return meal;
+  }
+
+  public Meal findMealById(long id) {
+    return mealRepository.findById(id);
   }
 
   @Transactional
   public void removeMeal(Meal meal) {
     mealRepository.delete(meal);
+  }
+
+  @Transactional
+  public void removeMeal(long mealId) {
+    mealRepository.deleteById(mealId);
   }
 }
