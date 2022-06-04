@@ -35,4 +35,14 @@ public class MealService {
   public void removeMeal(long mealId) {
     mealRepository.deleteById(mealId);
   }
+
+  @Transactional
+  public Meal updateMeal(long id, Meal newMeal) {
+    Meal toBeUpdatedMeal = mealRepository.findById(id);
+    toBeUpdatedMeal.setName(newMeal.getName());
+    toBeUpdatedMeal.setDescription(newMeal.getDescription());
+
+    mealRepository.persist(toBeUpdatedMeal);
+    return toBeUpdatedMeal;
+  }
 }

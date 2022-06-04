@@ -38,6 +38,14 @@ public class MealController {
     return Response.ok().entity(createdMeal).build();
   }
 
+  @PUT
+  @Path("/{id}")
+  @Consumes(APPLICATION_JSON)
+  public Response updateMeal(@PathParam("id") long id, Meal meal) {
+    Meal updatedMeal = mealService.updateMeal(id, meal);
+    return Response.ok().entity(updatedMeal).build();
+  }
+
   @DELETE
   @Path("/{id}")
   @Produces

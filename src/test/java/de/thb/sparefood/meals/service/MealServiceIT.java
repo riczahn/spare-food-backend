@@ -34,4 +34,15 @@ class MealServiceIT {
     List<Meal> availableMeals = mealService.getAllAvailableMeals();
     assertThat(availableMeals).isEmpty();
   }
+
+  @Test
+  @TestTransaction
+  void updatingAMealKeepsTheIdButUpdatesAllOtherProperties() {
+    Meal createdMeal = mealService.addMeal(new Meal("any meal"));
+    createdMeal.setName("updated name");
+    createdMeal.setDescription("any description");
+
+    Meal updatedMeal = mealService.updateMeal(createdMeal.getId(), createdMeal);
+    assertThat(createdMeal).isEqualTo(updatedMeal);
+  }
 }

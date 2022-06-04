@@ -68,6 +68,26 @@ class MealControllerIT {
     deleteMealByIdViaApi(createdMeal.getId());
   }
 
+  @Test
+  void aCreatedMealCanBeUpdated() throws JsonProcessingException {
+    Meal anyMeal = createMealViaApi(new Meal("any meal"));
+    anyMeal.setName("a changed name");
+    anyMeal.setDescription("any description");
+
+    String jsonOfMeal = objectMapper.writeValueAsString(anyMeal);
+
+    with()
+        .header("Content-Type", "application/json")
+        .body(jsonOfMeal)
+        .put("/meals/{id}", anyMeal.getId())
+        .then()
+        .statusCode(200)
+        .and()
+        .body(is(jsonOfMeal));
+
+    deleteMealByIdViaApi(anyMeal.getId());
+  }
+
   private Meal createMealViaApi(Meal meal) throws JsonProcessingException {
     return with()
         .header("Content-Type", "application/json")
