@@ -52,10 +52,19 @@ class MealServiceTest {
 
   @Test
   void removingAMealCallsTheMealRepository() {
-    Meal anyMeal = new Meal("any meal");
+    long anyMealId = 1L;
+    mealService.removeMeal(anyMealId);
 
-    mealService.removeMeal(anyMeal);
+    verify(mealRepository, times(1)).deleteById(anyMealId);
+  }
 
-    verify(mealRepository, times(1)).delete(anyMeal);
+  @Test
+  void findByIdReturnsTheMealWithThatId() {
+    Meal expectedMeal = new Meal("meal with id 1");
+    when(mealRepository.findById(1L)).thenReturn(expectedMeal);
+
+    Meal actualMeal = mealService.findMealById(1L);
+
+    assertThat(actualMeal).isEqualTo(expectedMeal);
   }
 }

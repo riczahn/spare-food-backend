@@ -32,11 +32,6 @@ public class MealService {
   }
 
   @Transactional
-  public void removeMeal(Meal meal) {
-    mealRepository.delete(meal);
-  }
-
-  @Transactional
   public void removeMeal(long mealId) {
     mealRepository.deleteById(mealId);
   }

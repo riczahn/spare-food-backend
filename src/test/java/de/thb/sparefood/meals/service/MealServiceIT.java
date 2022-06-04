@@ -1,7 +1,6 @@
 package de.thb.sparefood.meals.service;
 
 import de.thb.sparefood.meals.model.Meal;
-import de.thb.sparefood.meals.service.MealService;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
@@ -19,21 +18,18 @@ class MealServiceIT {
   @Test
   @TestTransaction
   void addingAMealPersistsIt() {
-    Meal anyMeal = new Meal("any meal");
-
-    mealService.addMeal(anyMeal);
+    Meal createdMeal = mealService.addMeal(new Meal("any meal"));
 
     List<Meal> availableMeals = mealService.getAllAvailableMeals();
-    assertThat(availableMeals).hasSize(1).containsExactly(anyMeal);
+    assertThat(availableMeals).hasSize(1).containsExactly(createdMeal);
   }
 
   @Test
   @TestTransaction
   void removingAMealDeletesIt() {
-    Meal anyMeal = new Meal("any meal");
-    mealService.addMeal(anyMeal);
+    Meal createdMeal = mealService.addMeal(new Meal("any meal"));
 
-    mealService.removeMeal(anyMeal);
+    mealService.removeMeal(createdMeal.getId());
 
     List<Meal> availableMeals = mealService.getAllAvailableMeals();
     assertThat(availableMeals).isEmpty();
