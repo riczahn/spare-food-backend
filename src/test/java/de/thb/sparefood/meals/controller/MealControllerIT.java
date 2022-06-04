@@ -2,7 +2,9 @@ package de.thb.sparefood.meals.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.thb.sparefood.PostgresResource;
 import de.thb.sparefood.meals.model.Meal;
+import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
 
@@ -13,6 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.core.Is.is;
 
 @QuarkusTest
+@QuarkusTestResource(PostgresResource.class)
 class MealControllerIT {
 
   private final ObjectMapper objectMapper = new ObjectMapper();
