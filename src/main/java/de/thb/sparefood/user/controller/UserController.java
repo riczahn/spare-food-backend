@@ -7,6 +7,8 @@ import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
+import java.util.Optional;
+
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 
@@ -19,13 +21,13 @@ public class UserController {
   @GET
   @Path("/{email}")
   public Response findUserByEmail(@PathParam("email") String email) {
-    User user = userService.getUserByEmail(email);
+    Optional<User> user = userService.getUserByEmail(email);
 
-    if (user == null) {
+    if (user.isEmpty()) {
       return Response.status(NOT_FOUND).build();
     }
 
-    return Response.ok().entity(user).build();
+    return Response.ok().entity(user.get()).build();
   }
 
   @POST

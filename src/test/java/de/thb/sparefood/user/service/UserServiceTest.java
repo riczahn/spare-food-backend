@@ -8,6 +8,8 @@ import de.thb.sparefood.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -34,7 +36,7 @@ class UserServiceTest {
     User anyUser = new User(anyEmail, "any", "any", "any");
     BasicAuthDTO correctCredentials = new BasicAuthDTO(anyEmail, "any");
 
-    when(userRepository.findByEmail(anyEmail)).thenReturn(anyUser);
+    when(userRepository.findByEmail(anyEmail)).thenReturn(Optional.of(anyUser));
     when(authenticationHelper.isPasswordCorrect(any(), any())).thenReturn(true);
 
     boolean actualResult = userService.isCorrectPasswordProvided(correctCredentials);
@@ -47,7 +49,7 @@ class UserServiceTest {
     User anyUser = new User(anyEmail, "any", "any", "any");
     BasicAuthDTO correctCredentials = new BasicAuthDTO(anyEmail, "any");
 
-    when(userRepository.findByEmail(anyEmail)).thenReturn(anyUser);
+    when(userRepository.findByEmail(anyEmail)).thenReturn(Optional.of(anyUser));
     when(authenticationHelper.isPasswordCorrect(any(), any())).thenReturn(false);
 
     boolean actualResult = userService.isCorrectPasswordProvided(correctCredentials);
@@ -60,7 +62,7 @@ class UserServiceTest {
     String unknownEmail = "unknown@Mail.de";
     BasicAuthDTO dtoWithNonExistentUser = new BasicAuthDTO(unknownEmail, "any");
 
-    when(userRepository.findByEmail(unknownEmail)).thenReturn(null);
+    when(userRepository.findByEmail(unknownEmail)).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> userService.isCorrectPasswordProvided(dtoWithNonExistentUser))
         .isInstanceOf(UnknownUserException.class);

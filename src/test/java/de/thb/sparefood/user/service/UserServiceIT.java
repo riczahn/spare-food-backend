@@ -8,7 +8,6 @@ import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
-
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -48,7 +47,7 @@ class UserServiceIT {
     List<User> allUsers = userService.getAllUsers();
     User userToBeQueriedFor = allUsers.get(0);
 
-    User actualUser = userService.getUserByEmail(userToBeQueriedFor.getEmail());
+    User actualUser = userService.getUserByEmail(userToBeQueriedFor.getEmail()).orElseThrow();
 
     assertThat(actualUser).isEqualTo(userToBeQueriedFor);
   }

@@ -11,6 +11,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 
 @ApplicationScoped
 @AllArgsConstructor
@@ -23,7 +24,7 @@ public class UserService {
     return userRepository.listAll();
   }
 
-  public User getUserByEmail(String email) {
+  public Optional<User> getUserByEmail(String email) {
     return userRepository.findByEmail(email);
   }
 
@@ -39,13 +40,14 @@ public class UserService {
   }
 
   public boolean isCorrectPasswordProvided(BasicAuthDTO basicAuthDTO) throws UnknownUserException {
-    User user = getUserByEmail(basicAuthDTO.getEmail());
+    Optional<User> user = getUserByEmail(basicAuthDTO.getEmail());
 
-    if (user == null) {
+    if (user.isEmpty()) {
       throw new UnknownUserException(
           String.format("No user found with email %s", basicAuthDTO.getEmail()));
     }
 
-    return authenticationHelper.isPasswordCorrect(user.getPassword(), basicAuthDTO.getPassword());
+    return authenticationHelper.isPasswordCorrect(
+        user.get().getPassword(), basicAuthDTO.getPassword());
   }
 }
