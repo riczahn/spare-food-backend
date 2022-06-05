@@ -20,7 +20,7 @@ class UserControllerIT {
 
   @Test
   void aUserCanBeCreatedAndFoundAndDeletedByEmail() throws JsonProcessingException {
-    User anyNonExistentUser = new User("aNewUser@mail.de", "any lastname", "any firstname");
+    User anyNonExistentUser = new User("aNewUser@mail.de", "any lastname", "any firstname", "password");
     String jsonOfUser = objectMapper.writeValueAsString(anyNonExistentUser);
 
     given()

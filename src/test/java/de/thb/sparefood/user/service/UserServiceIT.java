@@ -22,7 +22,7 @@ class UserServiceIT {
   @Test
   @TestTransaction
   void addingANewUserPersistsIt() {
-    User anyUser = new User("any@email.de", "any lastname", "any firstname");
+    User anyUser = new User("any@email.de", "any lastname", "any firstname", "anyPassword");
 
     User createdUser = userService.addUser(anyUser);
 

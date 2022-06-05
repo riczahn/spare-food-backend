@@ -20,7 +20,7 @@ import static org.hamcrest.core.Is.is;
 class MealControllerIT {
 
   private final ObjectMapper objectMapper = new ObjectMapper();
-  private final User anyUser = new User("testuser@test.de", "Testuser", "Test");
+  private final User anyUser = new User("testuser@test.de", "Testuser", "Test", "password");
   private final Meal anyMeal = new Meal("any meal", anyUser);
 
   @Test

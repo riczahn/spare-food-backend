@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class MealServiceIT {
 
   @Inject MealService mealService;
-  private final User anyUser = new User("testuser@test.de", "Testuser", "Test");
+  private final User anyUser = new User("testuser@test.de", "Testuser", "Test", "password");
   private final Meal anyMeal = new Meal("any meal", anyUser);
 
   @Test
