@@ -1,6 +1,6 @@
 package de.thb.sparefood.meals.model;
 
-import de.thb.sparefood.auth.model.User;
+import de.thb.sparefood.user.model.User;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

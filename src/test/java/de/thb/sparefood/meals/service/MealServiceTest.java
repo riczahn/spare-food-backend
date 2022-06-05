@@ -1,6 +1,6 @@
 package de.thb.sparefood.meals.service;
 
-import de.thb.sparefood.auth.model.User;
+import de.thb.sparefood.user.model.User;
 import de.thb.sparefood.meals.model.Meal;
 import de.thb.sparefood.meals.repository.MealRepository;
 import org.junit.jupiter.api.BeforeEach;

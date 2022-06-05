@@ -1,4 +1,4 @@
-package de.thb.sparefood.auth.model;
+package de.thb.sparefood.user.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

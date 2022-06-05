@@ -1,7 +1,7 @@
 package de.thb.sparefood.meals.service;
 
 import de.thb.sparefood.PostgresResource;
-import de.thb.sparefood.auth.model.User;
+import de.thb.sparefood.user.model.User;
 import de.thb.sparefood.meals.model.Meal;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.common.QuarkusTestResource;
