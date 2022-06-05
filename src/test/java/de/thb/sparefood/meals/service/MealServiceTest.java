@@ -1,5 +1,6 @@
 package de.thb.sparefood.meals.service;
 
+import de.thb.sparefood.auth.model.User;
 import de.thb.sparefood.meals.model.Meal;
 import de.thb.sparefood.meals.repository.MealRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +16,8 @@ class MealServiceTest {
 
   private MealService mealService;
   private MealRepository mealRepository;
+  private final User anyUser = new User();
+  private final Meal anyMeal = new Meal("any meal", anyUser);
 
   @BeforeEach
   void setUp() {
@@ -33,7 +36,6 @@ class MealServiceTest {
 
   @Test
   void whenOneMealIsAvailableReturnAListOfThatMeal() {
-    Meal anyMeal = new Meal("any meal");
     when(mealRepository.listAll()).thenReturn(List.of(anyMeal));
 
     List<Meal> allAvailableMeals = mealService.getAllAvailableMeals();
@@ -43,8 +45,6 @@ class MealServiceTest {
 
   @Test
   void addingAMealCallsTheMealRepository() {
-    Meal anyMeal = new Meal("any meal");
-
     mealService.addMeal(anyMeal);
 
     verify(mealRepository, times(1)).persist(anyMeal);
@@ -60,7 +60,7 @@ class MealServiceTest {
 
   @Test
   void findByIdReturnsTheMealWithThatId() {
-    Meal expectedMeal = new Meal("meal with id 1");
+    Meal expectedMeal = new Meal("meal with id 1", anyUser);
     when(mealRepository.findById(1L)).thenReturn(expectedMeal);
 
     Meal actualMeal = mealService.findMealById(1L);

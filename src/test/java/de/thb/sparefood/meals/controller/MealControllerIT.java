@@ -3,6 +3,7 @@ package de.thb.sparefood.meals.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.thb.sparefood.PostgresResource;
+import de.thb.sparefood.auth.model.User;
 import de.thb.sparefood.meals.model.Meal;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
@@ -19,6 +20,8 @@ import static org.hamcrest.core.Is.is;
 class MealControllerIT {
 
   private final ObjectMapper objectMapper = new ObjectMapper();
+  private final User anyUser = new User("testuser@test.de", "Testuser", "Test");
+  private final Meal anyMeal = new Meal("any meal", anyUser);
 
   @Test
   void givenNoMealsReturnAnEmptyList() {
@@ -27,8 +30,8 @@ class MealControllerIT {
 
   @Test
   void twoAddedMealsAreBeingPersistedAndCanBeRetrievedAndDeleted() throws JsonProcessingException {
-    Meal anyMeal = new Meal("Meal 1");
-    Meal anyOtherMeal = new Meal("Meal 2");
+    Meal anyMeal = new Meal("Meal 1", anyUser);
+    Meal anyOtherMeal = new Meal("Meal 2", anyUser);
 
     Meal createdMealOne = createMealViaApi(anyMeal);
     Meal createdMealTwo = createMealViaApi(anyOtherMeal);
@@ -57,7 +60,7 @@ class MealControllerIT {
 
   @Test
   void aCreatedMealCanBeRetrievedByItsId() throws JsonProcessingException {
-    Meal createdMeal = createMealViaApi(new Meal("any meal"));
+    Meal createdMeal = createMealViaApi(anyMeal);
 
     String expectedJsonOfMeal = objectMapper.writeValueAsString(createdMeal);
 
@@ -73,22 +76,22 @@ class MealControllerIT {
 
   @Test
   void aCreatedMealCanBeUpdated() throws JsonProcessingException {
-    Meal anyMeal = createMealViaApi(new Meal("any meal"));
-    anyMeal.setName("a changed name");
-    anyMeal.setDescription("any description");
+    Meal createdMeal = createMealViaApi(anyMeal);
+    createdMeal.setName("a changed name");
+    createdMeal.setDescription("any description");
 
-    String jsonOfMeal = objectMapper.writeValueAsString(anyMeal);
+    String jsonOfMeal = objectMapper.writeValueAsString(createdMeal);
 
     with()
         .header("Content-Type", "application/json")
         .body(jsonOfMeal)
-        .put("/meals/{id}", anyMeal.getId())
+        .put("/meals/{id}", createdMeal.getId())
         .then()
         .statusCode(200)
         .and()
         .body(is(jsonOfMeal));
 
-    deleteMealByIdViaApi(anyMeal.getId());
+    deleteMealByIdViaApi(createdMeal.getId());
   }
 
   private Meal createMealViaApi(Meal meal) throws JsonProcessingException {
