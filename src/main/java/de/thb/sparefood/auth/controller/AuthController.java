@@ -2,6 +2,7 @@ package de.thb.sparefood.auth.controller;
 
 import de.thb.sparefood.auth.token.TokenUtils;
 import de.thb.sparefood.auth.model.BasicAuthDTO;
+import de.thb.sparefood.user.exception.UnknownUserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +47,7 @@ public class AuthController {
     try {
       String token = tokenUtils.generateToken(basicAuthDTO);
       return Response.ok().entity(token).build();
-    } catch (SecurityException e) {
+    } catch (SecurityException | UnknownUserException e) {
       logger.info(e.getMessage());
       return Response.status(UNAUTHORIZED).build();
     }
