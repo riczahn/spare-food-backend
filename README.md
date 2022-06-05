@@ -1,8 +1,16 @@
 # sparefood-backend Project
 
-This project uses Quarkus, the Supersonic Subatomic Java Framework.
+## NEXT STEPS
+1. Cleanup the mess that I left behind (e.g. unit tests for edge cases, return optional instead of null, add logging)
+2. Apply the need of authentication to the MealController
+3. Add location based queries for meals
+4. Add Meal Properties like vegan, contains fish and so on
+5. Chat
+6. Social Eating
 
-If you want to learn more about Quarkus, please visit its website: https://quarkus.io/ .
+## THINGS THAT ANNOY ME
+* AssertJ and Hamcrest are mixed due to RESTAssured only supporting Hamcrest...
+* Ambiguous namings. (create, add, persist) settle for one and only one.
 
 ## Running the application in dev mode
 
