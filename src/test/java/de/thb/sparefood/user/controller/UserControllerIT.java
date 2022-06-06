@@ -47,4 +47,18 @@ class UserControllerIT {
   void tryingToDeleteANonExistentUserReturns404() {
     when().delete("/users/{email}", "THISEMAILDOESNOTEXIST@mail.de").then().statusCode(404);
   }
+
+  @Test
+  void tryingToCreateAUserWithoutEmailReturns400() throws JsonProcessingException {
+    User anyNewUser = new User(null, "any lastname", "any firstname", "password");
+    String jsonOfUser = objectMapper.writeValueAsString(anyNewUser);
+
+    given()
+        .header("Content-Type", "application/json")
+        .body(jsonOfUser)
+        .when()
+        .post("/users")
+        .then()
+        .statusCode(400);
+  }
 }

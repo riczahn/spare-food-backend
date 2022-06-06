@@ -9,9 +9,11 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
+import java.security.InvalidParameterException;
 import java.util.Optional;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 
 @Path("/users")
@@ -37,7 +39,14 @@ public class UserController {
   @POST
   @Consumes(APPLICATION_JSON)
   public Response createUser(User user) {
-    userService.addUser(user);
+    try {
+      userService.addUser(user);
+    } catch (InvalidParameterException e) {
+      return Response.status(BAD_REQUEST).entity(e.getMessage()).build();
+    } catch (Exception e) {
+      logger.error("Failed to add user!", e);
+      return Response.serverError().build();
+    }
     return Response.ok().entity(user).build();
   }
 

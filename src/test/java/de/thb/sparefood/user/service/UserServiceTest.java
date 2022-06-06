@@ -8,6 +8,7 @@ import de.thb.sparefood.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import javax.persistence.TransactionRequiredException;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -22,17 +23,18 @@ class UserServiceTest {
   private UserService userService;
 
   private final String anyEmail = "anyMail@test.de";
+  private User anyUser;
 
   @BeforeEach
   void setUp() {
     userRepository = mock(UserRepository.class);
     authenticationHelper = mock(AuthenticationHelper.class);
     userService = new UserService(userRepository, authenticationHelper);
+    this.anyUser = new User(anyEmail, "any", "any", "any");
   }
 
   @Test
   void givenCorrectCredentialsExpectsTrue() throws UnknownUserException {
-    User anyUser = new User(anyEmail, "any", "any", "any");
     BasicAuthDTO correctCredentials = new BasicAuthDTO(anyEmail, "any");
 
     when(userRepository.findByEmail(anyEmail)).thenReturn(Optional.of(anyUser));
@@ -45,7 +47,6 @@ class UserServiceTest {
 
   @Test
   void givenWrongCredentialsExpectsFalse() throws UnknownUserException {
-    User anyUser = new User(anyEmail, "any", "any", "any");
     BasicAuthDTO correctCredentials = new BasicAuthDTO(anyEmail, "any");
 
     when(userRepository.findByEmail(anyEmail)).thenReturn(Optional.of(anyUser));
@@ -74,5 +75,13 @@ class UserServiceTest {
 
     assertThatThrownBy(() -> userService.removeUserWithEmail(unknownEmail))
         .isInstanceOf(UnknownUserException.class);
+  }
+
+  @Test
+  void whenExceptionIsThrownFromRepositoryTheExceptionIsPropagated() {
+    doThrow(TransactionRequiredException.class).when(userRepository).persist(anyUser);
+
+    assertThatThrownBy(() -> userService.addUser(anyUser))
+        .isInstanceOf(TransactionRequiredException.class);
   }
 }

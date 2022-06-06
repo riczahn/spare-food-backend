@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import java.security.InvalidParameterException;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,6 +31,10 @@ public class UserService {
 
   @Transactional
   public User addUser(User user) {
+    if (user.getEmail() == null) {
+      throw new InvalidParameterException("Missing value for property email");
+    }
+
     userRepository.persist(user);
     return user;
   }
