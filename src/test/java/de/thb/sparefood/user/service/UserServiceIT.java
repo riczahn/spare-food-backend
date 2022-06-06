@@ -1,6 +1,7 @@
 package de.thb.sparefood.user.service;
 
 import de.thb.sparefood.PostgresResource;
+import de.thb.sparefood.user.exception.UnknownUserException;
 import de.thb.sparefood.user.model.User;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.common.QuarkusTestResource;
@@ -30,7 +31,7 @@ class UserServiceIT {
 
   @Test
   @TestTransaction
-  void removingAUserDeletesTheCorrectUser() {
+  void removingAUserDeletesTheCorrectUser() throws UnknownUserException {
     List<User> allUsersBeforeRemoval = userService.getAllUsers();
     User userToBeRemoved = allUsersBeforeRemoval.get(0);
 

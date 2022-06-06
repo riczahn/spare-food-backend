@@ -35,7 +35,7 @@ public class UserService {
   }
 
   @Transactional
-  public void removeUserWithEmail(String email) {
+  public void removeUserWithEmail(String email) throws UnknownUserException {
     userRepository.deleteByEmail(email);
   }
 

@@ -13,8 +13,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class UserServiceTest {
 
@@ -65,6 +64,15 @@ class UserServiceTest {
     when(userRepository.findByEmail(unknownEmail)).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> userService.isCorrectPasswordProvided(dtoWithNonExistentUser))
+        .isInstanceOf(UnknownUserException.class);
+  }
+
+  @Test
+  void tryingToDeleteANonExistentUserThrowsException() throws UnknownUserException {
+    String unknownEmail = "unknown@Mail.de";
+    doThrow(UnknownUserException.class).when(userRepository).deleteByEmail(unknownEmail);
+
+    assertThatThrownBy(() -> userService.removeUserWithEmail(unknownEmail))
         .isInstanceOf(UnknownUserException.class);
   }
 }

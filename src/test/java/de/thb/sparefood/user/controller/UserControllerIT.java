@@ -20,8 +20,8 @@ class UserControllerIT {
 
   @Test
   void aUserCanBeCreatedAndFoundAndDeletedByEmail() throws JsonProcessingException {
-    User anyNonExistentUser = new User("aNewUser@mail.de", "any lastname", "any firstname", "password");
-    String jsonOfUser = objectMapper.writeValueAsString(anyNonExistentUser);
+    User anyNewUser = new User("aNewUser@mail.de", "any lastname", "any firstname", "password");
+    String jsonOfUser = objectMapper.writeValueAsString(anyNewUser);
 
     given()
         .header("Content-Type", "application/json")
@@ -32,14 +32,19 @@ class UserControllerIT {
         .statusCode(200);
 
     when()
-        .get("/users/{email}", anyNonExistentUser.getEmail())
+        .get("/users/{email}", anyNewUser.getEmail())
         .then()
         .statusCode(200)
         .and()
         .body(is(jsonOfUser));
 
-    when().delete("/users/{email}", anyNonExistentUser.getEmail()).then().statusCode(204);
+    when().delete("/users/{email}", anyNewUser.getEmail()).then().statusCode(204);
 
-    when().get("/users/{email}", anyNonExistentUser.getEmail()).then().statusCode(404);
+    when().get("/users/{email}", anyNewUser.getEmail()).then().statusCode(404);
+  }
+
+  @Test
+  void tryingToDeleteANonExistentUserReturns404() {
+    when().delete("/users/{email}", "THISEMAILDOESNOTEXIST@mail.de").then().statusCode(404);
   }
 }
