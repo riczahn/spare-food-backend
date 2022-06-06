@@ -1,15 +1,18 @@
 package de.thb.sparefood.meals.service;
 
-import de.thb.sparefood.user.model.User;
 import de.thb.sparefood.meals.model.Meal;
 import de.thb.sparefood.meals.repository.MealRepository;
+import de.thb.sparefood.user.model.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import javax.persistence.PersistenceException;
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 class MealServiceTest {
@@ -48,6 +51,22 @@ class MealServiceTest {
     mealService.addMeal(anyMeal);
 
     verify(mealRepository, times(1)).persist(anyMeal);
+  }
+
+  @Test
+  void addingAMealWithoutANameThrowsAnException() {
+    Meal mealWithoutName = new Meal();
+
+    assertThatThrownBy(() -> mealService.addMeal(mealWithoutName))
+        .isInstanceOf(InvalidParameterException.class);
+  }
+
+  @Test
+  void whenMealRepositoryThrowsAnExceptionItWillBePropagated() {
+    doThrow(PersistenceException.class).when(mealRepository).persist((Meal) any());
+
+    assertThatThrownBy(() -> mealService.addMeal(anyMeal))
+        .isInstanceOf(PersistenceException.class);
   }
 
   @Test

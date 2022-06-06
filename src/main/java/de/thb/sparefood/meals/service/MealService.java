@@ -6,6 +6,7 @@ import de.thb.sparefood.meals.repository.MealRepository;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import java.security.InvalidParameterException;
 import java.util.List;
 
 @ApplicationScoped
@@ -23,6 +24,10 @@ public class MealService {
 
   @Transactional
   public Meal addMeal(Meal meal) {
+    if (meal.getName() == null) {
+      throw new InvalidParameterException("Missing value for property name");
+    }
+
     mealRepository.persist(meal);
     return meal;
   }

@@ -3,18 +3,24 @@ package de.thb.sparefood.meals.controller;
 import de.thb.sparefood.meals.model.Meal;
 import de.thb.sparefood.meals.service.MealService;
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
+import java.security.InvalidParameterException;
 import java.util.List;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 
 @Path("/meals")
 @AllArgsConstructor
 @Produces(APPLICATION_JSON)
 public class MealController {
+
+  private static final Logger logger = LoggerFactory.getLogger(MealController.class);
 
   @Inject MealService mealService;
 
@@ -34,7 +40,16 @@ public class MealController {
   @POST
   @Consumes(APPLICATION_JSON)
   public Response addMeal(Meal meal) {
-    Meal createdMeal = mealService.addMeal(meal);
+    Meal createdMeal;
+    try {
+      createdMeal = mealService.addMeal(meal);
+    } catch (InvalidParameterException e) {
+      return Response.status(BAD_REQUEST).entity(e.getMessage()).build();
+    } catch (Exception e) {
+      logger.error("Failed to add meal!", e);
+      return Response.serverError().build();
+    }
+
     return Response.ok().entity(createdMeal).build();
   }
 

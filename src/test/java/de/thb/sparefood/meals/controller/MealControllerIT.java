@@ -3,15 +3,16 @@ package de.thb.sparefood.meals.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.thb.sparefood.PostgresResource;
-import de.thb.sparefood.user.model.User;
 import de.thb.sparefood.meals.model.Meal;
+import de.thb.sparefood.user.model.User;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static io.restassured.RestAssured.*;
+import static io.restassured.RestAssured.when;
+import static io.restassured.RestAssured.with;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.core.Is.is;
 
@@ -92,6 +93,20 @@ class MealControllerIT {
         .body(is(jsonOfMeal));
 
     deleteMealByIdViaApi(createdMeal.getId());
+  }
+
+  @Test
+  void addingAMealWithoutANameReturns400() throws JsonProcessingException {
+    Meal mealWithoutName = new Meal();
+    String jsonOfMeal = objectMapper.writeValueAsString(mealWithoutName);
+
+    with()
+        .header("Content-Type", "application/json")
+        .body(jsonOfMeal)
+        .when()
+        .post("/meals")
+        .then()
+        .statusCode(400);
   }
 
   private Meal createMealViaApi(Meal meal) throws JsonProcessingException {
