@@ -102,7 +102,7 @@ class MealServiceTest {
     long anyNonExistentId = 9999L;
     when(mealRepository.findByIdOptional(anyNonExistentId)).thenReturn(Optional.empty());
 
-    assertThatThrownBy(() -> mealService.updateMeal(anyNonExistentId, anyMeal))
+    assertThatThrownBy(() -> mealService.updateMeal(anyNonExistentId, anyMeal, anyUser))
         .isInstanceOf(MealNotFoundException.class);
   }
 }

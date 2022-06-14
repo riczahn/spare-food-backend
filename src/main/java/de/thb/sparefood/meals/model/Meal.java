@@ -1,5 +1,6 @@
 package de.thb.sparefood.meals.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.thb.sparefood.user.model.User;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,6 +16,7 @@ public class Meal {
   private String name;
   private String description;
 
+  @JsonIgnore
   @ManyToOne(optional = false, fetch = FetchType.EAGER)
   private User creator;
 
@@ -25,5 +27,10 @@ public class Meal {
   public Meal(String name, User user) {
     this.name = name;
     this.creator = user;
+  }
+
+  public void adoptValuesFrom(Meal other) {
+    this.setName(other.getName());
+    this.setDescription(other.getDescription());
   }
 }

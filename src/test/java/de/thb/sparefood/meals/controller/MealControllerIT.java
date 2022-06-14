@@ -38,13 +38,20 @@ class MealControllerIT {
 
     TokenUtils tokenUtils = new TokenUtils(userService);
 
-    this.tokenForTestUser = tokenUtils.generateToken(new BasicAuthDTO("testuser@test.de", "password"));
+    this.tokenForTestUser =
+        tokenUtils.generateToken(new BasicAuthDTO("testuser@test.de", "password"));
     this.anyMeal = new Meal("any meal");
   }
 
   @Test
   void givenNoMealsReturnAnEmptyList() {
-    when().get("/meals").then().statusCode(200).body(is("[]"));
+    with()
+        .header("Authorization", "Bearer " + tokenForTestUser)
+        .when()
+        .get("/meals")
+        .then()
+        .statusCode(200)
+        .body(is("[]"));
   }
 
   @Test
@@ -76,7 +83,13 @@ class MealControllerIT {
     deleteMealByIdViaApi(createdMealTwo.getId());
 
     // assert all meals have been deleted
-    when().get("/meals").then().statusCode(200).body(is("[]"));
+    with()
+        .header("Authorization", "Bearer " + tokenForTestUser)
+        .when()
+        .get("/meals")
+        .then()
+        .statusCode(200)
+        .body(is("[]"));
   }
 
   @Test
@@ -114,6 +127,7 @@ class MealControllerIT {
     Meal createdMeal = createMealViaApi(anyMeal);
     createdMeal.setName("a changed name");
     createdMeal.setDescription("any description");
+    createdMeal.setCreator(null);
 
     String jsonOfMeal = objectMapper.writeValueAsString(createdMeal);
 
@@ -176,6 +190,11 @@ class MealControllerIT {
   }
 
   private void deleteMealByIdViaApi(Long mealId) {
-    when().delete("/meals/{id}", mealId).then().statusCode(204);
+    with()
+        .header("Authorization", "Bearer " + tokenForTestUser)
+        .when()
+        .delete("/meals/{id}", mealId)
+        .then()
+        .statusCode(204);
   }
 }

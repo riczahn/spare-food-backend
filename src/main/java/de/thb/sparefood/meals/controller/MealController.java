@@ -25,6 +25,7 @@ import static javax.ws.rs.core.Response.Status.*;
 @Path("/meals")
 @AllArgsConstructor
 @Produces(APPLICATION_JSON)
+@RolesAllowed("User")
 public class MealController {
 
   private static final Logger logger = LoggerFactory.getLogger(MealController.class);
@@ -40,7 +41,6 @@ public class MealController {
 
   @GET
   @Path("/{id}")
-  @RolesAllowed("User")
   public Response getMealById(@PathParam("id") long id, @Context SecurityContext ctx) {
     Optional<Meal> optionalMeal = mealService.findMealById(id);
 
@@ -58,7 +58,6 @@ public class MealController {
 
   @POST
   @Consumes(APPLICATION_JSON)
-  @RolesAllowed("User")
   public Response addMeal(Meal meal, @Context SecurityContext ctx) {
     String email = ctx.getUserPrincipal().getName();
     Optional<User> user = userService.getUserByEmail(email);
@@ -86,9 +85,17 @@ public class MealController {
   @PUT
   @Path("/{id}")
   @Consumes(APPLICATION_JSON)
-  public Response updateMeal(@PathParam("id") long id, Meal meal) {
+  public Response updateMeal(@PathParam("id") long id, Meal meal, @Context SecurityContext ctx) {
+    String email = ctx.getUserPrincipal().getName();
+    Optional<User> user = userService.getUserByEmail(email);
+
+    if (user.isEmpty()) {
+      logger.error("Couldn't find user for user principal name of {}", email);
+      return Response.serverError().build();
+    }
+
     try {
-      Meal updatedMeal = mealService.updateMeal(id, meal);
+      Meal updatedMeal = mealService.updateMeal(id, meal, user.get());
       return Response.ok().entity(updatedMeal).build();
     } catch (MealNotFoundException e) {
       logger.error(e.getMessage());
