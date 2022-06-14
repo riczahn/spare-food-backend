@@ -1,5 +1,6 @@
 package de.thb.sparefood.meals.service;
 
+import de.thb.sparefood.meals.exception.MealNotFoundException;
 import de.thb.sparefood.meals.model.Meal;
 import de.thb.sparefood.meals.repository.MealRepository;
 import de.thb.sparefood.user.model.User;
@@ -66,8 +67,7 @@ class MealServiceTest {
   void whenMealRepositoryThrowsAnExceptionItWillBePropagated() {
     doThrow(PersistenceException.class).when(mealRepository).persist((Meal) any());
 
-    assertThatThrownBy(() -> mealService.addMeal(anyMeal))
-        .isInstanceOf(PersistenceException.class);
+    assertThatThrownBy(() -> mealService.addMeal(anyMeal)).isInstanceOf(PersistenceException.class);
   }
 
   @Test
@@ -95,5 +95,14 @@ class MealServiceTest {
     Optional<Meal> actualMeal = mealService.findMealById(1L);
 
     assertThat(actualMeal).isEmpty();
+  }
+
+  @Test
+  void updatingANonExistentMealThrowsException() {
+    long anyNonExistentId = 9999L;
+    when(mealRepository.findByIdOptional(anyNonExistentId)).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> mealService.updateMeal(anyNonExistentId, anyMeal))
+        .isInstanceOf(MealNotFoundException.class);
   }
 }

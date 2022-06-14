@@ -1,14 +1,18 @@
 package de.thb.sparefood.meals.controller;
 
+import de.thb.sparefood.meals.exception.MealNotFoundException;
 import de.thb.sparefood.meals.model.Meal;
 import de.thb.sparefood.meals.service.MealService;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
 import java.security.InvalidParameterException;
 import java.util.List;
 import java.util.Optional;
@@ -38,7 +42,7 @@ public class MealController {
     Optional<Meal> meal = mealService.findMealById(id);
 
     if (meal.isPresent()) {
-      return Response.ok().entity(meal).build();
+      return Response.ok().entity(meal.get()).build();
     } else {
       return Response.status(NOT_FOUND).build();
     }
@@ -64,8 +68,13 @@ public class MealController {
   @Path("/{id}")
   @Consumes(APPLICATION_JSON)
   public Response updateMeal(@PathParam("id") long id, Meal meal) {
-    Meal updatedMeal = mealService.updateMeal(id, meal);
-    return Response.ok().entity(updatedMeal).build();
+    try {
+      Meal updatedMeal = mealService.updateMeal(id, meal);
+      return Response.ok().entity(updatedMeal).build();
+    } catch (MealNotFoundException e) {
+      logger.error(e.getMessage());
+      return Response.status(NOT_FOUND).build();
+    }
   }
 
   @DELETE

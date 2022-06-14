@@ -1,5 +1,6 @@
 package de.thb.sparefood.meals.service;
 
+import de.thb.sparefood.meals.exception.MealNotFoundException;
 import de.thb.sparefood.meals.model.Meal;
 import de.thb.sparefood.meals.repository.MealRepository;
 
@@ -43,8 +44,12 @@ public class MealService {
   }
 
   @Transactional
-  public Meal updateMeal(long id, Meal newMeal) {
-    Meal toBeUpdatedMeal = mealRepository.findById(id);
+  public Meal updateMeal(long id, Meal newMeal) throws MealNotFoundException {
+    Optional<Meal> optionalMeal = mealRepository.findByIdOptional(id);
+    Meal toBeUpdatedMeal =
+        optionalMeal.orElseThrow(
+            () -> new MealNotFoundException(String.format("No Meal found with id %d", id)));
+
     toBeUpdatedMeal.setName(newMeal.getName());
     toBeUpdatedMeal.setDescription(newMeal.getDescription());
 

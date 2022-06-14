@@ -1,6 +1,7 @@
 package de.thb.sparefood.meals.service;
 
 import de.thb.sparefood.PostgresResource;
+import de.thb.sparefood.meals.exception.MealNotFoundException;
 import de.thb.sparefood.user.model.User;
 import de.thb.sparefood.meals.model.Meal;
 import io.quarkus.test.TestTransaction;
@@ -43,7 +44,7 @@ class MealServiceIT {
 
   @Test
   @TestTransaction
-  void updatingAMealKeepsTheIdButUpdatesAllOtherProperties() {
+  void updatingAMealKeepsTheIdButUpdatesAllOtherProperties() throws MealNotFoundException {
     Meal createdMeal = mealService.addMeal(anyMeal);
     createdMeal.setName("updated name");
     createdMeal.setDescription("any description");

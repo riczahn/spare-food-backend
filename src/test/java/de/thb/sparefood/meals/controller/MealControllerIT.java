@@ -103,6 +103,20 @@ class MealControllerIT {
   }
 
   @Test
+  void updatingANonExistentMealReturns404() throws JsonProcessingException {
+    int anyNotUsedId = 99999;
+
+    String jsonOfMeal = objectMapper.writeValueAsString(anyMeal);
+
+    with()
+        .header("Content-Type", "application/json")
+        .body(jsonOfMeal)
+        .put("/meals/{id}", anyNotUsedId)
+        .then()
+        .statusCode(404);
+  }
+
+  @Test
   void addingAMealWithoutANameReturns400() throws JsonProcessingException {
     Meal mealWithoutName = new Meal();
     String jsonOfMeal = objectMapper.writeValueAsString(mealWithoutName);
