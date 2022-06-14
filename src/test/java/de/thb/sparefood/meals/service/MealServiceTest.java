@@ -49,38 +49,8 @@ class MealServiceTest {
   }
 
   @Test
-  void addingAMealCallsTheMealRepository() {
-    mealService.addMeal(anyMeal);
-
-    verify(mealRepository, times(1)).persist(anyMeal);
-  }
-
-  @Test
-  void addingAMealWithoutANameThrowsAnException() {
-    Meal mealWithoutName = new Meal();
-
-    assertThatThrownBy(() -> mealService.addMeal(mealWithoutName))
-        .isInstanceOf(InvalidParameterException.class);
-  }
-
-  @Test
-  void whenMealRepositoryThrowsAnExceptionItWillBePropagated() {
-    doThrow(PersistenceException.class).when(mealRepository).persist((Meal) any());
-
-    assertThatThrownBy(() -> mealService.addMeal(anyMeal)).isInstanceOf(PersistenceException.class);
-  }
-
-  @Test
-  void removingAMealCallsTheMealRepository() {
-    long anyMealId = 1L;
-    mealService.removeMeal(anyMealId);
-
-    verify(mealRepository, times(1)).deleteById(anyMealId);
-  }
-
-  @Test
   void findByIdReturnsTheMealWithThatId() {
-    Meal expectedMeal = new Meal("meal with id 1", anyUser);
+    Meal expectedMeal = new Meal("meal with id 1");
     when(mealRepository.findByIdOptional(1L)).thenReturn(Optional.of(expectedMeal));
 
     Optional<Meal> actualMeal = mealService.findMealById(1L);
@@ -98,11 +68,41 @@ class MealServiceTest {
   }
 
   @Test
+  void addingAMealCallsTheMealRepository() {
+    mealService.addMeal(anyMeal);
+
+    verify(mealRepository, times(1)).persist(anyMeal);
+  }
+
+  @Test
+  void addingAMealWithoutANameThrowsAnException() {
+    Meal mealWithoutName = new Meal();
+
+    assertThatThrownBy(() -> mealService.addMeal(mealWithoutName))
+        .isInstanceOf(InvalidParameterException.class);
+  }
+
+  @Test
   void updatingANonExistentMealThrowsException() {
     long anyNonExistentId = 9999L;
     when(mealRepository.findByIdOptional(anyNonExistentId)).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> mealService.updateMeal(anyNonExistentId, anyMeal, anyUser))
         .isInstanceOf(MealNotFoundException.class);
+  }
+
+  @Test
+  void removingAMealCallsTheMealRepository() {
+    long anyMealId = 1L;
+    mealService.removeMeal(anyMealId);
+
+    verify(mealRepository, times(1)).deleteById(anyMealId);
+  }
+
+  @Test
+  void whenMealRepositoryThrowsAnExceptionItWillBePropagated() {
+    doThrow(PersistenceException.class).when(mealRepository).persist((Meal) any());
+
+    assertThatThrownBy(() -> mealService.addMeal(anyMeal)).isInstanceOf(PersistenceException.class);
   }
 }

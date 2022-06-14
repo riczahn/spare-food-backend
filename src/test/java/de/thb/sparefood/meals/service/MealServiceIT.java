@@ -34,17 +34,6 @@ class MealServiceIT {
 
   @Test
   @TestTransaction
-  void removingAMealDeletesIt() {
-    Meal createdMeal = mealService.addMeal(anyMeal);
-
-    mealService.removeMeal(createdMeal.getId());
-
-    List<Meal> availableMeals = mealService.getAllAvailableMeals();
-    assertThat(availableMeals).isEmpty();
-  }
-
-  @Test
-  @TestTransaction
   void updatingAMealKeepsTheIdButUpdatesAllOtherProperties() throws MealNotFoundException {
     Meal createdMeal = mealService.addMeal(anyMeal);
     createdMeal.setName("updated name");
@@ -63,8 +52,18 @@ class MealServiceIT {
     Long id = createdMeal.getId();
 
     User aDifferentUser = new User();
-    assertThatThrownBy(
-            () -> mealService.updateMeal(id, createdMeal, aDifferentUser))
+    assertThatThrownBy(() -> mealService.updateMeal(id, createdMeal, aDifferentUser))
         .isInstanceOf(SecurityException.class);
+  }
+
+  @Test
+  @TestTransaction
+  void removingAMealDeletesIt() {
+    Meal createdMeal = mealService.addMeal(anyMeal);
+
+    mealService.removeMeal(createdMeal.getId());
+
+    List<Meal> availableMeals = mealService.getAllAvailableMeals();
+    assertThat(availableMeals).isEmpty();
   }
 }
