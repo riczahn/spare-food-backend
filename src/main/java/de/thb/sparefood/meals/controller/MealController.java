@@ -3,6 +3,8 @@ package de.thb.sparefood.meals.controller;
 import de.thb.sparefood.meals.exception.MealNotFoundException;
 import de.thb.sparefood.meals.model.Meal;
 import de.thb.sparefood.meals.service.MealService;
+import de.thb.sparefood.user.model.User;
+import de.thb.sparefood.user.service.UserService;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,8 +20,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
-import static javax.ws.rs.core.Response.Status.NOT_FOUND;
+import static javax.ws.rs.core.Response.Status.*;
 
 @Path("/meals")
 @AllArgsConstructor
@@ -29,6 +30,7 @@ public class MealController {
   private static final Logger logger = LoggerFactory.getLogger(MealController.class);
 
   @Inject MealService mealService;
+  @Inject UserService userService;
 
   @GET
   public Response getAllMeals() {
@@ -38,19 +40,36 @@ public class MealController {
 
   @GET
   @Path("/{id}")
-  public Response getMealById(@PathParam("id") long id) {
-    Optional<Meal> meal = mealService.findMealById(id);
+  @RolesAllowed("User")
+  public Response getMealById(@PathParam("id") long id, @Context SecurityContext ctx) {
+    Optional<Meal> optionalMeal = mealService.findMealById(id);
 
-    if (meal.isPresent()) {
-      return Response.ok().entity(meal.get()).build();
-    } else {
+    if (optionalMeal.isEmpty()) {
       return Response.status(NOT_FOUND).build();
     }
+
+    Meal meal = optionalMeal.get();
+    if (!meal.getCreator().getEmail().equals(ctx.getUserPrincipal().getName())) {
+      return Response.status(FORBIDDEN).build();
+    }
+
+    return Response.ok().entity(meal).build();
   }
 
   @POST
   @Consumes(APPLICATION_JSON)
-  public Response addMeal(Meal meal) {
+  @RolesAllowed("User")
+  public Response addMeal(Meal meal, @Context SecurityContext ctx) {
+    String email = ctx.getUserPrincipal().getName();
+    Optional<User> user = userService.getUserByEmail(email);
+
+    if (user.isEmpty()) {
+      logger.error("Couldn't find user for user principal name of {}", email);
+      return Response.serverError().build();
+    }
+
+    meal.setCreator(user.get());
+
     Meal createdMeal;
     try {
       createdMeal = mealService.addMeal(meal);

@@ -17,8 +17,12 @@ public class TokenUtils {
 
   @Inject UserService userService;
 
+  public TokenUtils(UserService userService) {
+    this.userService = userService;
+  }
+
   public String generateToken(BasicAuthDTO basicAuthDTO) throws UnknownUserException {
-    if (userService.isCorrectPasswordProvided(basicAuthDTO)) {
+    if (!userService.isCorrectPasswordProvided(basicAuthDTO)) {
       throw new SecurityException("Wrong combination of username and password");
     }
 

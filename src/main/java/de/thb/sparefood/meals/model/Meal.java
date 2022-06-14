@@ -18,6 +18,10 @@ public class Meal {
   @ManyToOne(optional = false, fetch = FetchType.EAGER)
   private User creator;
 
+  public Meal(String name) {
+    this.name = name;
+  }
+
   public Meal(String name, User user) {
     this.name = name;
     this.creator = user;
