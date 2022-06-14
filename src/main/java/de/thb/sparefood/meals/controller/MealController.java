@@ -11,9 +11,11 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.security.InvalidParameterException;
 import java.util.List;
+import java.util.Optional;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 
 @Path("/meals")
 @AllArgsConstructor
@@ -33,8 +35,13 @@ public class MealController {
   @GET
   @Path("/{id}")
   public Response getMealById(@PathParam("id") long id) {
-    Meal meal = mealService.findMealById(id);
-    return Response.ok().entity(meal).build();
+    Optional<Meal> meal = mealService.findMealById(id);
+
+    if (meal.isPresent()) {
+      return Response.ok().entity(meal).build();
+    } else {
+      return Response.status(NOT_FOUND).build();
+    }
   }
 
   @POST

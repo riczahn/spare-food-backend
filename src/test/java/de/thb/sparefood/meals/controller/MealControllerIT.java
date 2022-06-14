@@ -76,6 +76,13 @@ class MealControllerIT {
   }
 
   @Test
+  void queryingForANonExistentMealReturns404() {
+    int anyNotUsedId = 99999;
+
+    when().get("/meals/{id}", anyNotUsedId).then().statusCode(404);
+  }
+
+  @Test
   void aCreatedMealCanBeUpdated() throws JsonProcessingException {
     Meal createdMeal = createMealViaApi(anyMeal);
     createdMeal.setName("a changed name");

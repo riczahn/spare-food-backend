@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import javax.transaction.Transactional;
 import java.security.InvalidParameterException;
 import java.util.List;
+import java.util.Optional;
 
 @ApplicationScoped
 public class MealService {
@@ -32,8 +33,8 @@ public class MealService {
     return meal;
   }
 
-  public Meal findMealById(long id) {
-    return mealRepository.findById(id);
+  public Optional<Meal> findMealById(long id) {
+    return mealRepository.findByIdOptional(id);
   }
 
   @Transactional

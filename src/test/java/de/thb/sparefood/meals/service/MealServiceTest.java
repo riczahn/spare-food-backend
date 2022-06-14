@@ -10,6 +10,7 @@ import javax.persistence.PersistenceException;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -80,10 +81,19 @@ class MealServiceTest {
   @Test
   void findByIdReturnsTheMealWithThatId() {
     Meal expectedMeal = new Meal("meal with id 1", anyUser);
-    when(mealRepository.findById(1L)).thenReturn(expectedMeal);
+    when(mealRepository.findByIdOptional(1L)).thenReturn(Optional.of(expectedMeal));
 
-    Meal actualMeal = mealService.findMealById(1L);
+    Optional<Meal> actualMeal = mealService.findMealById(1L);
 
-    assertThat(actualMeal).isEqualTo(expectedMeal);
+    assertThat(actualMeal).contains(expectedMeal);
+  }
+
+  @Test
+  void findByIdReturnsEmptyOptionalIfMealWithIdDoesNotExist() {
+    when(mealRepository.findByIdOptional(1L)).thenReturn(Optional.empty());
+
+    Optional<Meal> actualMeal = mealService.findMealById(1L);
+
+    assertThat(actualMeal).isEmpty();
   }
 }
