@@ -2,6 +2,7 @@ package de.thb.sparefood.meals.service;
 
 import de.thb.sparefood.meals.exception.MealNotFoundException;
 import de.thb.sparefood.meals.model.Meal;
+import de.thb.sparefood.meals.model.Property;
 import de.thb.sparefood.meals.repository.MealRepository;
 import de.thb.sparefood.user.model.User;
 
@@ -21,8 +22,16 @@ public class MealService {
     this.mealRepository = mealRepository;
   }
 
-  public List<Meal> getAllAvailableMeals() {
+  public List<Meal> getAllMeals() {
     return mealRepository.listAll();
+  }
+
+  public List<Meal> getAllMeals(List<Property> filterCriteria) {
+    if (filterCriteria.isEmpty()) {
+      return getAllMeals();
+    }
+
+    return mealRepository.findAllMealsWithProperties(filterCriteria);
   }
 
   @Transactional

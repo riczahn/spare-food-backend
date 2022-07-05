@@ -6,6 +6,7 @@ import de.thb.sparefood.PostgresResource;
 import de.thb.sparefood.auth.model.BasicAuthDTO;
 import de.thb.sparefood.auth.token.TokenUtils;
 import de.thb.sparefood.meals.model.Meal;
+import de.thb.sparefood.meals.model.Property;
 import de.thb.sparefood.user.exception.UnknownUserException;
 import de.thb.sparefood.user.service.UserService;
 import io.quarkus.test.common.QuarkusTestResource;
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.util.List;
+import java.util.Set;
 
 import static io.restassured.RestAssured.with;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -188,6 +190,35 @@ class MealControllerIT {
         .then()
         .statusCode(200)
         .body(is("[]"));
+  }
+
+  @Test
+  void foo() throws JsonProcessingException {
+    Meal vegetarianMeal = new Meal("Vegetarian Meal");
+    vegetarianMeal.setProperties(Set.of(Property.VEGETARIAN, Property.VEGAN));
+
+    Meal anyOtherMeal = new Meal("Any non vegetarian Meal");
+
+    Meal createdVegetarianMeal = createMealViaApi(vegetarianMeal, tokenForTestUser);
+    Meal createdMealTwo = createMealViaApi(anyOtherMeal, tokenForTestUser);
+
+    List<Meal> allVegetarianMeals =
+        with()
+            .header("Authorization", "Bearer " + tokenForTestUser)
+            .when()
+            .get("/meals?filter.property=vegetarian&filter.property=vegan")
+            .then()
+            .statusCode(200)
+            .and()
+            .extract()
+            .body()
+            .jsonPath()
+            .getList("", Meal.class);
+
+    assertThat(allVegetarianMeals).containsExactlyInAnyOrder(createdVegetarianMeal);
+
+    deleteMealByIdViaApi(createdVegetarianMeal.getId(), tokenForTestUser);
+    deleteMealByIdViaApi(createdMealTwo.getId(), tokenForTestUser);
   }
 
   private Meal createMealViaApi(Meal meal, String token) throws JsonProcessingException {

@@ -28,7 +28,7 @@ class MealServiceIT {
   void addingAMealPersistsIt() {
     Meal createdMeal = mealService.addMeal(anyMeal);
 
-    List<Meal> availableMeals = mealService.getAllAvailableMeals();
+    List<Meal> availableMeals = mealService.getAllMeals();
     assertThat(availableMeals).hasSize(1).containsExactly(createdMeal);
   }
 
@@ -63,7 +63,7 @@ class MealServiceIT {
 
     mealService.removeMeal(createdMeal.getId());
 
-    List<Meal> availableMeals = mealService.getAllAvailableMeals();
+    List<Meal> availableMeals = mealService.getAllMeals();
     assertThat(availableMeals).isEmpty();
   }
 }

@@ -2,6 +2,7 @@ package de.thb.sparefood.meals.controller;
 
 import de.thb.sparefood.meals.exception.MealNotFoundException;
 import de.thb.sparefood.meals.model.Meal;
+import de.thb.sparefood.meals.model.Property;
 import de.thb.sparefood.meals.service.MealService;
 import de.thb.sparefood.user.model.User;
 import de.thb.sparefood.user.service.UserService;
@@ -12,10 +13,9 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.*;
 import java.security.InvalidParameterException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,8 +34,18 @@ public class MealController {
   @Inject UserService userService;
 
   @GET
-  public Response getAllMeals() {
-    List<Meal> availableMeals = mealService.getAllAvailableMeals();
+  public Response getAllMeals(@Context UriInfo info) {
+    MultivaluedMap<String, String> queryParameters = info.getQueryParameters();
+
+    List<Property> filterCriteria;
+    try {
+      filterCriteria = extractFilterQueryParameter(queryParameters);
+    } catch (IllegalArgumentException e) {
+      logger.debug("Failed to extract query filter parameter!", e);
+      return Response.status(BAD_REQUEST).entity(e.getMessage()).build();
+    }
+
+    List<Meal> availableMeals = mealService.getAllMeals(filterCriteria);
     return Response.ok().entity(availableMeals).build();
   }
 
@@ -109,5 +119,22 @@ public class MealController {
   public Response deleteMeal(@PathParam("id") long id) {
     mealService.removeMeal(id);
     return Response.noContent().build();
+  }
+
+  private List<Property> extractFilterQueryParameter(
+      MultivaluedMap<String, String> queryParameters) {
+    List<String> filterProperties = queryParameters.get("filter.property");
+
+    if (filterProperties == null) {
+      return new ArrayList<>();
+    }
+
+    List<Property> filterCriteria = new ArrayList<>();
+    for (String propertyName : filterProperties) {
+      Property property = Property.valueOf(propertyName.toUpperCase());
+      filterCriteria.add(property);
+    }
+
+    return filterCriteria;
   }
 }

@@ -34,7 +34,7 @@ class MealServiceTest {
   void whenNoMealsAvailableReturnAnEmptyList() {
     when(mealRepository.listAll()).thenReturn(new ArrayList<>());
 
-    List<Meal> allAvailableMeals = mealService.getAllAvailableMeals();
+    List<Meal> allAvailableMeals = mealService.getAllMeals();
 
     assertThat(allAvailableMeals).isEmpty();
   }
@@ -43,7 +43,7 @@ class MealServiceTest {
   void whenOneMealIsAvailableReturnAListOfThatMeal() {
     when(mealRepository.listAll()).thenReturn(List.of(anyMeal));
 
-    List<Meal> allAvailableMeals = mealService.getAllAvailableMeals();
+    List<Meal> allAvailableMeals = mealService.getAllMeals();
 
     assertThat(allAvailableMeals).hasSize(1).containsExactly(anyMeal);
   }

@@ -6,8 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "meal")
@@ -18,10 +18,10 @@ public class Meal {
   private String name;
   private String description;
 
-  @Column
-  @Enumerated
   @ElementCollection(targetClass = Property.class, fetch = FetchType.EAGER)
-  private List<Property> properties;
+  @CollectionTable(name = "meal_properties", joinColumns = @JoinColumn(name = "meal_id"))
+  @Enumerated(EnumType.STRING)
+  private Set<Property> properties;
 
   @JsonIgnore
   @ManyToOne(optional = false, fetch = FetchType.EAGER)
@@ -36,10 +36,10 @@ public class Meal {
   }
 
   public Meal(String name, String description, User user) {
-    this(name, description, new ArrayList<>(), user);
+    this(name, description, new HashSet<>(), user);
   }
 
-  public Meal(String name, String description, List<Property> properties, User user) {
+  public Meal(String name, String description, Set<Property> properties, User user) {
     this.name = name;
     this.description = description;
     this.properties = properties;
