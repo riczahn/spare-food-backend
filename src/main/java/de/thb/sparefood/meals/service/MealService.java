@@ -4,6 +4,7 @@ import de.thb.sparefood.meals.exception.MealNotFoundException;
 import de.thb.sparefood.meals.model.Meal;
 import de.thb.sparefood.meals.model.Property;
 import de.thb.sparefood.meals.repository.MealRepository;
+import de.thb.sparefood.user.exception.MealCantBeReservedException;
 import de.thb.sparefood.user.model.User;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -27,10 +28,6 @@ public class MealService {
   }
 
   public List<Meal> getAllMeals(List<Property> filterCriteria) {
-    if (filterCriteria.isEmpty()) {
-      return getAllMeals();
-    }
-
     return mealRepository.findAllMealsWithProperties(filterCriteria);
   }
 
@@ -69,5 +66,44 @@ public class MealService {
     mealRepository.persist(toBeUpdatedMeal);
 
     return toBeUpdatedMeal;
+  }
+
+  @Transactional
+  public void reserveMeal(long mealId, User user)
+      throws MealNotFoundException, MealCantBeReservedException {
+    Meal meal =
+        findMealById(mealId)
+            .orElseThrow(
+                () -> new MealNotFoundException(String.format("No Meal found with id %d", mealId)));
+
+    if (meal.getReservingUser() != null) {
+      throw new MealCantBeReservedException(
+          String.format(
+              "Meal with the id %d can't be reserved since it is already reserved.", mealId));
+    }
+
+    meal.setReservingUser(user);
+    mealRepository.persist(meal);
+  }
+
+  @Transactional
+  public void releaseMeal(long mealId, User executingUser) throws MealNotFoundException {
+    Meal meal =
+        findMealById(mealId)
+            .orElseThrow(
+                () -> new MealNotFoundException(String.format("No Meal found with id %d", mealId)));
+
+    User reservingUser = meal.getReservingUser();
+    if (reservingUser == null) {
+      return;
+    }
+
+    if (!reservingUser.getEmail().equals(executingUser.getEmail())) {
+      throw new SecurityException(
+          String.format("Meal with the id %d is reserved by another user.", mealId));
+    }
+
+    meal.setReservingUser(null);
+    mealRepository.persist(meal);
   }
 }

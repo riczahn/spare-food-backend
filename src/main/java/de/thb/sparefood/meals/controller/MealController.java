@@ -4,6 +4,7 @@ import de.thb.sparefood.meals.exception.MealNotFoundException;
 import de.thb.sparefood.meals.model.Meal;
 import de.thb.sparefood.meals.model.Property;
 import de.thb.sparefood.meals.service.MealService;
+import de.thb.sparefood.user.exception.MealCantBeReservedException;
 import de.thb.sparefood.user.model.User;
 import de.thb.sparefood.user.service.UserService;
 import lombok.AllArgsConstructor;
@@ -136,5 +137,51 @@ public class MealController {
     }
 
     return filterCriteria;
+  }
+
+  @POST
+  @Path("/{id}/reserve")
+  public Response reserveMeal(@PathParam("id") long id, @Context SecurityContext ctx) {
+    String email = ctx.getUserPrincipal().getName();
+    Optional<User> user = userService.getUserByEmail(email);
+
+    if (user.isEmpty()) {
+      logger.error("Couldn't find user for user principal name of {}", email);
+      return Response.serverError().build();
+    }
+
+    try {
+      mealService.reserveMeal(id, user.get());
+      return Response.ok().build();
+    } catch (MealNotFoundException e) {
+      logger.error(e.getMessage());
+      return Response.status(NOT_FOUND).build();
+    } catch (MealCantBeReservedException e) {
+      logger.error(e.getMessage());
+      return Response.status(CONFLICT).build();
+    }
+  }
+
+  @POST
+  @Path("/{id}/release")
+  public Response releaseMeal(@PathParam("id") long id, @Context SecurityContext ctx) {
+    String email = ctx.getUserPrincipal().getName();
+    Optional<User> user = userService.getUserByEmail(email);
+
+    if (user.isEmpty()) {
+      logger.error("Couldn't find user for user principal name of {}", email);
+      return Response.serverError().build();
+    }
+
+    try {
+      mealService.releaseMeal(id, user.get());
+      return Response.ok().build();
+    } catch (MealNotFoundException e) {
+      logger.error(e.getMessage());
+      return Response.status(NOT_FOUND).build();
+    } catch (SecurityException e) {
+      logger.error(e.getMessage());
+      return Response.status(FORBIDDEN).build();
+    }
   }
 }

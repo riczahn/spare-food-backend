@@ -193,7 +193,7 @@ class MealControllerIT {
   }
 
   @Test
-  void foo() throws JsonProcessingException {
+  void mealsCanBeFilteredByTheirProperties() throws JsonProcessingException {
     Meal vegetarianMeal = new Meal("Vegetarian Meal");
     vegetarianMeal.setProperties(Set.of(Property.VEGETARIAN, Property.VEGAN));
 
@@ -219,6 +219,45 @@ class MealControllerIT {
 
     deleteMealByIdViaApi(createdVegetarianMeal.getId(), tokenForTestUser);
     deleteMealByIdViaApi(createdMealTwo.getId(), tokenForTestUser);
+  }
+
+  @Test
+  void aMealCanBeReservedAndReleasedAndWillNotBeAvailableWhenReserved()
+      throws JsonProcessingException {
+    Meal anyMeal = new Meal("Meal 1");
+
+    Meal createdMeal = createMealViaApi(anyMeal, tokenForTestUser);
+
+    with()
+        .header("Authorization", "Bearer " + tokenForTestUser)
+        .when()
+        .post("/meals/{id}/reserve", createdMeal.getId())
+        .then()
+        .statusCode(200);
+
+    List<Meal> allAvailableMeals =
+        with()
+            .header("Authorization", "Bearer " + tokenForTestUser)
+            .when()
+            .get("/meals")
+            .then()
+            .statusCode(200)
+            .and()
+            .extract()
+            .body()
+            .jsonPath()
+            .getList("", Meal.class);
+
+    assertThat(allAvailableMeals).isEmpty();
+
+    with()
+        .header("Authorization", "Bearer " + tokenForTestUser)
+        .when()
+        .post("/meals/{id}/release", createdMeal.getId())
+        .then()
+        .statusCode(200);
+
+    deleteMealByIdViaApi(createdMeal.getId(), tokenForTestUser);
   }
 
   private Meal createMealViaApi(Meal meal, String token) throws JsonProcessingException {

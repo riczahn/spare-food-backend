@@ -18,6 +18,10 @@ public class Meal {
   private String name;
   private String description;
 
+  @JsonIgnore
+  @ManyToOne(fetch = FetchType.EAGER)
+  private User reservingUser;
+
   @ElementCollection(targetClass = Property.class, fetch = FetchType.EAGER)
   @CollectionTable(name = "meal_properties", joinColumns = @JoinColumn(name = "meal_id"))
   @Enumerated(EnumType.STRING)

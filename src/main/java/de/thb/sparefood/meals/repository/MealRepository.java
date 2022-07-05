@@ -27,6 +27,8 @@ public class MealRepository implements PanacheRepository<Meal> {
       i++;
     }
 
+    query.append(" WHERE m.reservinguser_email IS NULL");
+
     return getEntityManager().createNativeQuery(query.toString(), Meal.class).getResultList();
   }
 }
