@@ -26,10 +26,11 @@ class MealServiceIT {
   @Test
   @TestTransaction
   void addingAMealPersistsIt() {
+    int numberOfMeals = mealService.getAllMeals().size();
     Meal createdMeal = mealService.addMeal(anyMeal);
 
     List<Meal> availableMeals = mealService.getAllMeals();
-    assertThat(availableMeals).hasSize(1).containsExactly(createdMeal);
+    assertThat(availableMeals).hasSize(numberOfMeals + 1).contains(createdMeal);
   }
 
   @Test
@@ -59,11 +60,12 @@ class MealServiceIT {
   @Test
   @TestTransaction
   void removingAMealDeletesIt() {
+    List<Meal> mealsBeforeTest = mealService.getAllMeals();
     Meal createdMeal = mealService.addMeal(anyMeal);
 
     mealService.removeMeal(createdMeal.getId());
 
     List<Meal> availableMeals = mealService.getAllMeals();
-    assertThat(availableMeals).isEmpty();
+    assertThat(availableMeals).containsExactlyInAnyOrderElementsOf(mealsBeforeTest);
   }
 }

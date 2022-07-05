@@ -1,6 +1,7 @@
 package de.thb.sparefood.meals.service;
 
 import de.thb.sparefood.meals.exception.MealNotFoundException;
+import de.thb.sparefood.meals.model.FilterCriteria;
 import de.thb.sparefood.meals.model.Meal;
 import de.thb.sparefood.meals.model.Property;
 import de.thb.sparefood.meals.repository.MealRepository;
@@ -27,7 +28,7 @@ public class MealService {
     return mealRepository.listAll();
   }
 
-  public List<Meal> getAllMeals(List<Property> filterCriteria) {
+  public List<Meal> getAllMeals(FilterCriteria filterCriteria) {
     return mealRepository.findAllMealsWithProperties(filterCriteria);
   }
 

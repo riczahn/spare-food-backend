@@ -22,6 +22,9 @@ public class Meal {
   @ManyToOne(fetch = FetchType.EAGER)
   private User reservingUser;
 
+  @OneToOne
+  private Location location;
+
   @ElementCollection(targetClass = Property.class, fetch = FetchType.EAGER)
   @CollectionTable(name = "meal_properties", joinColumns = @JoinColumn(name = "meal_id"))
   @Enumerated(EnumType.STRING)

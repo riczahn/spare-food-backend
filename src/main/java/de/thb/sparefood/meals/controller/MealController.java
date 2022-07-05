@@ -1,6 +1,8 @@
 package de.thb.sparefood.meals.controller;
 
 import de.thb.sparefood.meals.exception.MealNotFoundException;
+import de.thb.sparefood.meals.model.FilterCriteria;
+import de.thb.sparefood.meals.model.Location;
 import de.thb.sparefood.meals.model.Meal;
 import de.thb.sparefood.meals.model.Property;
 import de.thb.sparefood.meals.service.MealService;
@@ -15,6 +17,7 @@ import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
+import java.nio.file.attribute.UserPrincipalNotFoundException;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,9 +41,9 @@ public class MealController {
   public Response getAllMeals(@Context UriInfo info) {
     MultivaluedMap<String, String> queryParameters = info.getQueryParameters();
 
-    List<Property> filterCriteria;
+    FilterCriteria filterCriteria;
     try {
-      filterCriteria = extractFilterQueryParameter(queryParameters);
+      filterCriteria = extractFilterCriteria(queryParameters);
     } catch (IllegalArgumentException e) {
       logger.debug("Failed to extract query filter parameter!", e);
       return Response.status(BAD_REQUEST).entity(e.getMessage()).build();
@@ -70,47 +73,34 @@ public class MealController {
   @POST
   @Consumes(APPLICATION_JSON)
   public Response addMeal(Meal meal, @Context SecurityContext ctx) {
-    String email = ctx.getUserPrincipal().getName();
-    Optional<User> user = userService.getUserByEmail(email);
-
-    if (user.isEmpty()) {
-      logger.error("Couldn't find user for user principal name of {}", email);
-      return Response.serverError().build();
-    }
-
-    meal.setCreator(user.get());
-
-    Meal createdMeal;
     try {
-      createdMeal = mealService.addMeal(meal);
+      User user = getCurrentUser(ctx);
+      meal.setCreator(user);
+
+      Meal createdMeal = mealService.addMeal(meal);
+      return Response.ok().entity(createdMeal).build();
     } catch (InvalidParameterException e) {
       return Response.status(BAD_REQUEST).entity(e.getMessage()).build();
     } catch (Exception e) {
       logger.error("Failed to add meal!", e);
       return Response.serverError().build();
     }
-
-    return Response.ok().entity(createdMeal).build();
   }
 
   @PUT
   @Path("/{id}")
   @Consumes(APPLICATION_JSON)
   public Response updateMeal(@PathParam("id") long id, Meal meal, @Context SecurityContext ctx) {
-    String email = ctx.getUserPrincipal().getName();
-    Optional<User> user = userService.getUserByEmail(email);
-
-    if (user.isEmpty()) {
-      logger.error("Couldn't find user for user principal name of {}", email);
-      return Response.serverError().build();
-    }
-
     try {
-      Meal updatedMeal = mealService.updateMeal(id, meal, user.get());
+      User user = getCurrentUser(ctx);
+      Meal updatedMeal = mealService.updateMeal(id, meal, user);
       return Response.ok().entity(updatedMeal).build();
     } catch (MealNotFoundException e) {
       logger.error(e.getMessage());
       return Response.status(NOT_FOUND).build();
+    } catch (Exception e) {
+      logger.error("Failed to update meal! %s", e);
+      return Response.status(INTERNAL_SERVER_ERROR).build();
     }
   }
 
@@ -122,36 +112,12 @@ public class MealController {
     return Response.noContent().build();
   }
 
-  private List<Property> extractFilterQueryParameter(
-      MultivaluedMap<String, String> queryParameters) {
-    List<String> filterProperties = queryParameters.get("filter.property");
-
-    if (filterProperties == null) {
-      return new ArrayList<>();
-    }
-
-    List<Property> filterCriteria = new ArrayList<>();
-    for (String propertyName : filterProperties) {
-      Property property = Property.valueOf(propertyName.toUpperCase());
-      filterCriteria.add(property);
-    }
-
-    return filterCriteria;
-  }
-
   @POST
   @Path("/{id}/reserve")
   public Response reserveMeal(@PathParam("id") long id, @Context SecurityContext ctx) {
-    String email = ctx.getUserPrincipal().getName();
-    Optional<User> user = userService.getUserByEmail(email);
-
-    if (user.isEmpty()) {
-      logger.error("Couldn't find user for user principal name of {}", email);
-      return Response.serverError().build();
-    }
-
     try {
-      mealService.reserveMeal(id, user.get());
+      User user = getCurrentUser(ctx);
+      mealService.reserveMeal(id, user);
       return Response.ok().build();
     } catch (MealNotFoundException e) {
       logger.error(e.getMessage());
@@ -159,22 +125,18 @@ public class MealController {
     } catch (MealCantBeReservedException e) {
       logger.error(e.getMessage());
       return Response.status(CONFLICT).build();
+    } catch (Exception e) {
+      logger.error("Failed to reserve meal! %s", e);
+      return Response.status(INTERNAL_SERVER_ERROR).build();
     }
   }
 
   @POST
   @Path("/{id}/release")
   public Response releaseMeal(@PathParam("id") long id, @Context SecurityContext ctx) {
-    String email = ctx.getUserPrincipal().getName();
-    Optional<User> user = userService.getUserByEmail(email);
-
-    if (user.isEmpty()) {
-      logger.error("Couldn't find user for user principal name of {}", email);
-      return Response.serverError().build();
-    }
-
     try {
-      mealService.releaseMeal(id, user.get());
+      User user = getCurrentUser(ctx);
+      mealService.releaseMeal(id, user);
       return Response.ok().build();
     } catch (MealNotFoundException e) {
       logger.error(e.getMessage());
@@ -182,6 +144,78 @@ public class MealController {
     } catch (SecurityException e) {
       logger.error(e.getMessage());
       return Response.status(FORBIDDEN).build();
+    } catch (Exception e) {
+      logger.error("Failed to release meal! %s", e);
+      return Response.status(INTERNAL_SERVER_ERROR).build();
     }
+  }
+
+  private User getCurrentUser(SecurityContext ctx) throws UserPrincipalNotFoundException {
+    String email = ctx.getUserPrincipal().getName();
+    Optional<User> user = userService.getUserByEmail(email);
+
+    if (user.isEmpty()) {
+      logger.error("Couldn't find user for user principal name of {}", email);
+      throw new UserPrincipalNotFoundException(
+          "Couldn't find user for user principal name of " + email);
+    }
+
+    return user.get();
+  }
+
+  private FilterCriteria extractFilterCriteria(MultivaluedMap<String, String> queryParameters) {
+    FilterCriteria filterCriteria = new FilterCriteria();
+    List<Property> properties = extractPropertiesFromQueryParameters(queryParameters);
+    filterCriteria.setProperties(properties);
+
+    Location location = extractLocationFromQueryParameters(queryParameters);
+    filterCriteria.setUserLocation(location);
+
+    Double searchRadius = extractSearchRadiusFromQueryParameters(queryParameters);
+    filterCriteria.setSearchRadius(searchRadius);
+
+    return filterCriteria;
+  }
+
+  private List<Property> extractPropertiesFromQueryParameters(
+      MultivaluedMap<String, String> queryParameters) {
+    List<String> filterProperties = queryParameters.get("filter.property");
+
+    if (filterProperties == null) {
+      return new ArrayList<>();
+    }
+
+    List<Property> properties = new ArrayList<>();
+    for (String propertyName : filterProperties) {
+      Property property = Property.valueOf(propertyName.toUpperCase());
+      properties.add(property);
+    }
+
+    return properties;
+  }
+
+  private Location extractLocationFromQueryParameters(
+      MultivaluedMap<String, String> queryParameters) {
+    String queryLongitude = queryParameters.getFirst("longitude");
+    String queryLatitude = queryParameters.getFirst("latitude");
+
+    if (queryLongitude == null || queryLatitude == null) {
+      // todo what to do here? exception? That would ruin all tests
+      return new Location();
+    }
+
+    Double longitude = Double.valueOf(queryLongitude);
+    Double latitude = Double.valueOf(queryLatitude);
+
+    return new Location(longitude, latitude);
+  }
+
+  private Double extractSearchRadiusFromQueryParameters(
+      MultivaluedMap<String, String> queryParameters) {
+    String queryRadius = queryParameters.getFirst("filter.radius");
+    if (queryRadius == null) {
+      return 0.0;
+    }
+    return Double.valueOf(queryRadius);
   }
 }

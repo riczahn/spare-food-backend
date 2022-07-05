@@ -48,17 +48,6 @@ class MealControllerIT {
   }
 
   @Test
-  void givenNoMealsReturnAnEmptyList() {
-    with()
-        .header("Authorization", "Bearer " + tokenForTestUser)
-        .when()
-        .get("/meals")
-        .then()
-        .statusCode(200)
-        .body(is("[]"));
-  }
-
-  @Test
   void queryingForANonExistentMealReturns404() {
     int anyNotUsedId = 99999;
 
@@ -177,19 +166,11 @@ class MealControllerIT {
 
     assertThat(createdMealOne.getName()).isEqualTo(anyMeal.getName());
     assertThat(createdMealTwo.getName()).isEqualTo(anyOtherMeal.getName());
-    assertThat(actualAvailableMeals).containsExactlyInAnyOrder(createdMealOne, createdMealTwo);
+    assertThat(actualAvailableMeals).contains(createdMealOne, createdMealTwo);
 
     deleteMealByIdViaApi(createdMealOne.getId(), tokenForTestUser);
     deleteMealByIdViaApi(createdMealTwo.getId(), tokenForTestUser);
-
-    // assert all meals have been deleted
-    with()
-        .header("Authorization", "Bearer " + tokenForTestUser)
-        .when()
-        .get("/meals")
-        .then()
-        .statusCode(200)
-        .body(is("[]"));
+    ;
   }
 
   @Test
@@ -215,7 +196,7 @@ class MealControllerIT {
             .jsonPath()
             .getList("", Meal.class);
 
-    assertThat(allVegetarianMeals).containsExactlyInAnyOrder(createdVegetarianMeal);
+    assertThat(allVegetarianMeals).contains(createdVegetarianMeal).doesNotContain(anyOtherMeal);
 
     deleteMealByIdViaApi(createdVegetarianMeal.getId(), tokenForTestUser);
     deleteMealByIdViaApi(createdMealTwo.getId(), tokenForTestUser);
@@ -248,7 +229,7 @@ class MealControllerIT {
             .jsonPath()
             .getList("", Meal.class);
 
-    assertThat(allAvailableMeals).isEmpty();
+    assertThat(allAvailableMeals).isNotEmpty().doesNotContain(createdMeal);
 
     with()
         .header("Authorization", "Bearer " + tokenForTestUser)
@@ -258,6 +239,33 @@ class MealControllerIT {
         .statusCode(200);
 
     deleteMealByIdViaApi(createdMeal.getId(), tokenForTestUser);
+  }
+
+  @Test
+  void foo() throws JsonProcessingException {
+    Meal mealInRange = new Meal("Vegetarian Meal");
+    Meal mealOutOfRange = new Meal("Any non vegetarian Meal");
+
+    Meal createdMealInRange = createMealViaApi(mealInRange, tokenForTestUser);
+    Meal createdMealOutOfRange = createMealViaApi(mealOutOfRange, tokenForTestUser);
+
+    List<Meal> allAvailableMealsInRange =
+        with()
+            .header("Authorization", "Bearer " + tokenForTestUser)
+            .when()
+            .get("/meals")
+            .then()
+            .statusCode(200)
+            .and()
+            .extract()
+            .body()
+            .jsonPath()
+            .getList("", Meal.class);
+
+    assertThat(allAvailableMealsInRange).containsExactly(mealInRange);
+
+    deleteMealByIdViaApi(createdMealInRange.getId(), tokenForTestUser);
+    deleteMealByIdViaApi(createdMealOutOfRange.getId(), tokenForTestUser);
   }
 
   private Meal createMealViaApi(Meal meal, String token) throws JsonProcessingException {

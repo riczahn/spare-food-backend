@@ -31,16 +31,15 @@ class UserServiceIT {
 
   @Test
   @TestTransaction
-  void removingAUserDeletesTheCorrectUser() throws UnknownUserException {
-    List<User> allUsersBeforeRemoval = userService.getAllUsers();
-    User userToBeRemoved = allUsersBeforeRemoval.get(0);
+  void aUserCanBeCreatedAndDeleted() throws UnknownUserException {
+    List<User> allUsersBeforeTest = userService.getAllUsers();
+    User anyUser = new User("any@email.de", "any lastname", "any firstname", "anyPassword");
+    User createdUser = userService.addUser(anyUser);
 
-    userService.removeUserWithEmail(userToBeRemoved.getEmail());
+    userService.removeUserWithEmail(createdUser.getEmail());
 
     List<User> allUsersAfterRemoval = userService.getAllUsers();
-    assertThat(allUsersAfterRemoval)
-        .hasSize(allUsersBeforeRemoval.size() - 1)
-        .doesNotContain(userToBeRemoved);
+    assertThat(allUsersAfterRemoval).containsExactlyInAnyOrderElementsOf(allUsersBeforeTest);
   }
 
   @Test
