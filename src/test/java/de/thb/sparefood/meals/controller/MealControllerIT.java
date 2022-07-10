@@ -29,6 +29,7 @@ import static org.mockito.Mockito.mock;
 @QuarkusTestResource(PostgresResource.class)
 class MealControllerIT {
 
+  private static final Double ANY_SEARCH_RADIUS = 1.0;
   private final ObjectMapper objectMapper = new ObjectMapper();
   private Meal anyMeal;
   private String tokenForTestUser;
@@ -161,6 +162,7 @@ class MealControllerIT {
             .header("Authorization", "Bearer " + tokenForTestUser)
             .queryParam("longitude", ANY_LONGITUDE)
             .queryParam("latitude", ANY_LATITUDE)
+            .queryParam("filter.radius", ANY_SEARCH_RADIUS)
             .when()
             .get("/meals")
             .then()
@@ -197,6 +199,7 @@ class MealControllerIT {
             .queryParam("filter.property", "vegan")
             .queryParam("longitude", ANY_LONGITUDE)
             .queryParam("latitude", ANY_LATITUDE)
+            .queryParam("filter.radius", ANY_SEARCH_RADIUS)
             .when()
             .get("/meals")
             .then()
@@ -232,6 +235,7 @@ class MealControllerIT {
             .header("Authorization", "Bearer " + tokenForTestUser)
             .queryParam("longitude", ANY_LONGITUDE)
             .queryParam("latitude", ANY_LATITUDE)
+            .queryParam("filter.radius", ANY_SEARCH_RADIUS)
             .when()
             .get("/meals")
             .then()
@@ -269,7 +273,7 @@ class MealControllerIT {
             .header("Authorization", "Bearer " + tokenForTestUser)
             .queryParam("longitude", ANY_LONGITUDE)
             .queryParam("latitude", ANY_LATITUDE)
-            .queryParam("filter.radius", "5")
+            .queryParam("filter.radius", ANY_SEARCH_RADIUS)
             .when()
             .get("/meals")
             .then()

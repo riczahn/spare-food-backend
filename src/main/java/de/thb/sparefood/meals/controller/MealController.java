@@ -203,8 +203,10 @@ public class MealController {
       throw new InvalidParameterException("No Location details were specified.");
     }
 
-    Double longitude = Double.valueOf(queryLongitude);
-    Double latitude = Double.valueOf(queryLatitude);
+    Double longitude = Double.parseDouble(queryLongitude);
+    Double latitude = Double.parseDouble(queryLatitude);
+
+    validateLocationParameters(longitude, latitude);
 
     return new Location(longitude, latitude);
   }
@@ -212,9 +214,23 @@ public class MealController {
   private Double extractSearchRadiusFromQueryParameters(
       MultivaluedMap<String, String> queryParameters) {
     String queryRadius = queryParameters.getFirst("filter.radius");
+
     if (queryRadius == null) {
-      return 0.0;
+      throw new InvalidParameterException("No Location details were specified.");
+    } else if (Double.parseDouble(queryRadius) < 0.0) {
+      throw new InvalidParameterException("The search radius must be positive");
     }
+
     return Double.valueOf(queryRadius);
+  }
+
+  private void validateLocationParameters(Double longitude, Double latitude) {
+    if (longitude < -180 || longitude > 180) {
+      throw new IllegalArgumentException("Longitude must be between -180 and 180");
+    }
+
+    if (latitude < -90 || latitude > 90) {
+      throw new IllegalArgumentException("Longitude must be between -180 and 180");
+    }
   }
 }
