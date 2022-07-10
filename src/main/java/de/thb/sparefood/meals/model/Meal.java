@@ -22,7 +22,7 @@ public class Meal {
   @ManyToOne(fetch = FetchType.EAGER)
   private User reservingUser;
 
-  @OneToOne
+  @OneToOne(cascade = CascadeType.ALL)
   private Location location;
 
   @ElementCollection(targetClass = Property.class, fetch = FetchType.EAGER)
@@ -34,23 +34,25 @@ public class Meal {
   @ManyToOne(optional = false, fetch = FetchType.EAGER)
   private User creator;
 
-  public Meal(String name) {
-    this(name, null);
+  public Meal(String name, Location location) {
+    this(name, null, location);
   }
 
-  public Meal(String name, User user) {
-    this(name, null, user);
+  public Meal(String name, User user, Location location) {
+    this(name, null, user, location);
   }
 
-  public Meal(String name, String description, User user) {
-    this(name, description, new HashSet<>(), user);
+  public Meal(String name, String description, User user, Location location) {
+    this(name, description, new HashSet<>(), user, location);
   }
 
-  public Meal(String name, String description, Set<Property> properties, User user) {
+  public Meal(
+      String name, String description, Set<Property> properties, User user, Location location) {
     this.name = name;
     this.description = description;
     this.properties = properties;
     this.creator = user;
+    this.location = location;
   }
 
   public void adoptValuesFrom(Meal other) {

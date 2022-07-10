@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.thb.sparefood.PostgresResource;
 import de.thb.sparefood.auth.model.BasicAuthDTO;
 import de.thb.sparefood.auth.token.TokenUtils;
+import de.thb.sparefood.meals.model.Location;
 import de.thb.sparefood.meals.model.Meal;
 import de.thb.sparefood.meals.model.Property;
 import de.thb.sparefood.user.exception.UnknownUserException;
@@ -34,6 +35,8 @@ class MealControllerIT {
   private String tokenForADifferentUser;
   private static final String ANY_LONGITUDE = "52";
   private static final String ANY_LATITUDE = "56";
+  private static final Location ANY_LOCATION_IN_RANGE =
+      new Location(Double.valueOf(ANY_LONGITUDE), Double.valueOf(ANY_LATITUDE));
 
   @BeforeEach
   void setUpClass() throws UnknownUserException {
@@ -46,7 +49,7 @@ class MealControllerIT {
         tokenUtils.generateToken(new BasicAuthDTO("testuser@test.de", "password"));
     this.tokenForADifferentUser =
         tokenUtils.generateToken(new BasicAuthDTO("anotherUser@test.de", "password"));
-    this.anyMeal = new Meal("any meal");
+    this.anyMeal = new Meal("any meal", ANY_LOCATION_IN_RANGE);
   }
 
   @Test
@@ -147,8 +150,8 @@ class MealControllerIT {
 
   @Test
   void twoAddedMealsAreBeingPersistedAndCanBeRetrievedAndDeleted() throws JsonProcessingException {
-    Meal anyMeal = new Meal("Meal 1");
-    Meal anyOtherMeal = new Meal("Meal 2");
+    Meal anyMeal = new Meal("Meal 1", ANY_LOCATION_IN_RANGE);
+    Meal anyOtherMeal = new Meal("Meal 2", ANY_LOCATION_IN_RANGE);
 
     Meal createdMealOne = createMealViaApi(anyMeal, tokenForTestUser);
     Meal createdMealTwo = createMealViaApi(anyOtherMeal, tokenForTestUser);
@@ -179,10 +182,10 @@ class MealControllerIT {
 
   @Test
   void mealsCanBeFilteredByTheirProperties() throws JsonProcessingException {
-    Meal vegetarianMeal = new Meal("Vegetarian Meal");
+    Meal vegetarianMeal = new Meal("Vegetarian Meal", ANY_LOCATION_IN_RANGE);
     vegetarianMeal.setProperties(Set.of(Property.VEGETARIAN, Property.VEGAN));
 
-    Meal anyOtherMeal = new Meal("Any non vegetarian Meal");
+    Meal anyOtherMeal = new Meal("Any non vegetarian Meal", ANY_LOCATION_IN_RANGE);
 
     Meal createdVegetarianMeal = createMealViaApi(vegetarianMeal, tokenForTestUser);
     Meal createdMealTwo = createMealViaApi(anyOtherMeal, tokenForTestUser);
@@ -213,7 +216,7 @@ class MealControllerIT {
   @Test
   void aMealCanBeReservedAndReleasedAndWillNotBeAvailableWhenReserved()
       throws JsonProcessingException {
-    Meal anyMeal = new Meal("Meal 1");
+    Meal anyMeal = new Meal("Meal 1", ANY_LOCATION_IN_RANGE);
 
     Meal createdMeal = createMealViaApi(anyMeal, tokenForTestUser);
 
@@ -239,7 +242,7 @@ class MealControllerIT {
             .jsonPath()
             .getList("", Meal.class);
 
-    assertThat(allAvailableMeals).isNotEmpty().doesNotContain(createdMeal);
+    assertThat(allAvailableMeals).doesNotContain(createdMeal);
 
     with()
         .header("Authorization", "Bearer " + tokenForTestUser)
@@ -252,9 +255,11 @@ class MealControllerIT {
   }
 
   @Test
-  void foo() throws JsonProcessingException {
-    Meal mealInRange = new Meal("Vegetarian Meal");
-    Meal mealOutOfRange = new Meal("Any non vegetarian Meal");
+  void onlyMealsInRangeAreBeingShown() throws JsonProcessingException {
+    Meal mealInRange = new Meal("Vegetarian Meal", ANY_LOCATION_IN_RANGE);
+
+    Location anyLocationOutOfRange = new Location(10.0, 10.0);
+    Meal mealOutOfRange = new Meal("Any non vegetarian Meal", anyLocationOutOfRange);
 
     Meal createdMealInRange = createMealViaApi(mealInRange, tokenForTestUser);
     Meal createdMealOutOfRange = createMealViaApi(mealOutOfRange, tokenForTestUser);
@@ -262,8 +267,9 @@ class MealControllerIT {
     List<Meal> allAvailableMealsInRange =
         with()
             .header("Authorization", "Bearer " + tokenForTestUser)
-            .queryParam("longitude", "52")
-            .queryParam("latitude", "54")
+            .queryParam("longitude", ANY_LONGITUDE)
+            .queryParam("latitude", ANY_LATITUDE)
+            .queryParam("filter.radius", "5")
             .when()
             .get("/meals")
             .then()
@@ -274,7 +280,7 @@ class MealControllerIT {
             .jsonPath()
             .getList("", Meal.class);
 
-    assertThat(allAvailableMealsInRange).containsExactly(mealInRange);
+    assertThat(allAvailableMealsInRange).containsExactly(createdMealInRange);
 
     deleteMealByIdViaApi(createdMealInRange.getId(), tokenForTestUser);
     deleteMealByIdViaApi(createdMealOutOfRange.getId(), tokenForTestUser);

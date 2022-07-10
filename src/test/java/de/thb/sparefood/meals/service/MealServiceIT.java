@@ -2,6 +2,7 @@ package de.thb.sparefood.meals.service;
 
 import de.thb.sparefood.PostgresResource;
 import de.thb.sparefood.meals.exception.MealNotFoundException;
+import de.thb.sparefood.meals.model.Location;
 import de.thb.sparefood.meals.model.Meal;
 import de.thb.sparefood.user.model.User;
 import io.quarkus.test.TestTransaction;
@@ -21,7 +22,8 @@ class MealServiceIT {
 
   @Inject MealService mealService;
   private final User anyUser = new User("testuser@test.de", "Testuser", "Test", "password");
-  private final Meal anyMeal = new Meal("any meal", anyUser);
+  private final Location ANY_LOCATION = new Location(10.0, 10.0);
+  private final Meal anyMeal = new Meal("any meal", anyUser, ANY_LOCATION);
 
   @Test
   @TestTransaction

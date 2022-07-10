@@ -9,9 +9,10 @@ class MealTest {
 
   @Test
   void updatingFieldsOfMealWithFieldsFromAnotherMeal() {
-    Meal originalMeal = new Meal("Any Name", "Any Description", new User());
+    User user = new User();
+    Meal originalMeal = new Meal("Any Name", "Any Description", user, new Location());
 
-    Meal updateMeal = new Meal("New Name", "New Description", new User());
+    Meal updateMeal = new Meal("New Name", "New Description", user, new Location(50.0, 50.0));
 
     originalMeal.adoptValuesFrom(updateMeal);
 

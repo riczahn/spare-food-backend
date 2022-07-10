@@ -1,6 +1,7 @@
 package de.thb.sparefood.meals.service;
 
 import de.thb.sparefood.meals.exception.MealNotFoundException;
+import de.thb.sparefood.meals.model.Location;
 import de.thb.sparefood.meals.model.Meal;
 import de.thb.sparefood.meals.repository.MealRepository;
 import de.thb.sparefood.user.model.User;
@@ -22,7 +23,7 @@ class MealServiceTest {
   private MealService mealService;
   private MealRepository mealRepository;
   private final User anyUser = new User();
-  private final Meal anyMeal = new Meal("any meal", anyUser);
+  private final Meal anyMeal = new Meal("any meal", anyUser, new Location(10.0, 10.0));
 
   @BeforeEach
   void setUp() {
@@ -50,7 +51,7 @@ class MealServiceTest {
 
   @Test
   void findByIdReturnsTheMealWithThatId() {
-    Meal expectedMeal = new Meal("meal with id 1");
+    Meal expectedMeal = new Meal("meal with id 1", new Location(50.0, 50.0));
     when(mealRepository.findByIdOptional(1L)).thenReturn(Optional.of(expectedMeal));
 
     Optional<Meal> actualMeal = mealService.findMealById(1L);
