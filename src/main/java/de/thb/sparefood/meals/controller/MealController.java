@@ -5,6 +5,7 @@ import de.thb.sparefood.meals.model.FilterCriteria;
 import de.thb.sparefood.meals.model.Location;
 import de.thb.sparefood.meals.model.Meal;
 import de.thb.sparefood.meals.model.Property;
+import de.thb.sparefood.meals.service.ContextService;
 import de.thb.sparefood.meals.service.MealService;
 import de.thb.sparefood.user.exception.MealCantBeReservedException;
 import de.thb.sparefood.user.model.User;
@@ -17,7 +18,6 @@ import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
-import java.nio.file.attribute.UserPrincipalNotFoundException;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +36,7 @@ public class MealController {
 
   @Inject MealService mealService;
   @Inject UserService userService;
+  @Inject ContextService contextService;
 
   @GET
   public Response getAllMeals(@Context UriInfo info) {
@@ -72,9 +73,9 @@ public class MealController {
 
   @POST
   @Consumes(APPLICATION_JSON)
-  public Response addMeal(Meal meal, @Context SecurityContext ctx) {
+  public Response addMeal(Meal meal, @Context SecurityContext context) {
     try {
-      User user = getCurrentUser(ctx);
+      User user = contextService.getCurrentUser(context);
       meal.setCreator(user);
 
       Meal createdMeal = mealService.addMeal(meal);
@@ -90,9 +91,9 @@ public class MealController {
   @PUT
   @Path("/{id}")
   @Consumes(APPLICATION_JSON)
-  public Response updateMeal(@PathParam("id") long id, Meal meal, @Context SecurityContext ctx) {
+  public Response updateMeal(@PathParam("id") long id, Meal meal, @Context SecurityContext context) {
     try {
-      User user = getCurrentUser(ctx);
+      User user = contextService.getCurrentUser(context);
       Meal updatedMeal = mealService.updateMeal(id, meal, user);
       return Response.ok().entity(updatedMeal).build();
     } catch (MealNotFoundException e) {
@@ -114,9 +115,9 @@ public class MealController {
 
   @POST
   @Path("/{id}/reserve")
-  public Response reserveMeal(@PathParam("id") long id, @Context SecurityContext ctx) {
+  public Response reserveMeal(@PathParam("id") long id, @Context SecurityContext context) {
     try {
-      User user = getCurrentUser(ctx);
+      User user = contextService.getCurrentUser(context);
       mealService.reserveMeal(id, user);
       return Response.ok().build();
     } catch (MealNotFoundException e) {
@@ -133,9 +134,9 @@ public class MealController {
 
   @POST
   @Path("/{id}/release")
-  public Response releaseMeal(@PathParam("id") long id, @Context SecurityContext ctx) {
+  public Response releaseMeal(@PathParam("id") long id, @Context SecurityContext context) {
     try {
-      User user = getCurrentUser(ctx);
+      User user = contextService.getCurrentUser(context);
       mealService.releaseMeal(id, user);
       return Response.ok().build();
     } catch (MealNotFoundException e) {
@@ -148,19 +149,6 @@ public class MealController {
       logger.error("Failed to release meal! %s", e);
       return Response.status(INTERNAL_SERVER_ERROR).build();
     }
-  }
-
-  private User getCurrentUser(SecurityContext ctx) throws UserPrincipalNotFoundException {
-    String email = ctx.getUserPrincipal().getName();
-    Optional<User> user = userService.getUserByEmail(email);
-
-    if (user.isEmpty()) {
-      logger.error("Couldn't find user for user principal name of {}", email);
-      throw new UserPrincipalNotFoundException(
-          "Couldn't find user for user principal name of " + email);
-    }
-
-    return user.get();
   }
 
   private FilterCriteria extractFilterCriteria(MultivaluedMap<String, String> queryParameters) {
