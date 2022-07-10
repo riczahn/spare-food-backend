@@ -45,7 +45,7 @@ public class MealController {
     try {
       filterCriteria = extractFilterCriteria(queryParameters);
     } catch (IllegalArgumentException e) {
-      logger.debug("Failed to extract query filter parameter!", e);
+      logger.debug("Failed to extract query parameters!", e);
       return Response.status(BAD_REQUEST).entity(e.getMessage()).build();
     }
 
@@ -200,8 +200,7 @@ public class MealController {
     String queryLatitude = queryParameters.getFirst("latitude");
 
     if (queryLongitude == null || queryLatitude == null) {
-      // todo what to do here? exception? That would ruin all tests
-      return new Location();
+      throw new InvalidParameterException("No Location details were specified.");
     }
 
     Double longitude = Double.valueOf(queryLongitude);

@@ -32,6 +32,8 @@ class MealControllerIT {
   private Meal anyMeal;
   private String tokenForTestUser;
   private String tokenForADifferentUser;
+  private static final String ANY_LONGITUDE = "52";
+  private static final String ANY_LATITUDE = "56";
 
   @BeforeEach
   void setUpClass() throws UnknownUserException {
@@ -154,6 +156,8 @@ class MealControllerIT {
     List<Meal> actualAvailableMeals =
         with()
             .header("Authorization", "Bearer " + tokenForTestUser)
+            .queryParam("longitude", ANY_LONGITUDE)
+            .queryParam("latitude", ANY_LATITUDE)
             .when()
             .get("/meals")
             .then()
@@ -186,8 +190,12 @@ class MealControllerIT {
     List<Meal> allVegetarianMeals =
         with()
             .header("Authorization", "Bearer " + tokenForTestUser)
+            .queryParam("filter.property", "vegetarian")
+            .queryParam("filter.property", "vegan")
+            .queryParam("longitude", ANY_LONGITUDE)
+            .queryParam("latitude", ANY_LATITUDE)
             .when()
-            .get("/meals?filter.property=vegetarian&filter.property=vegan")
+            .get("/meals")
             .then()
             .statusCode(200)
             .and()
@@ -219,6 +227,8 @@ class MealControllerIT {
     List<Meal> allAvailableMeals =
         with()
             .header("Authorization", "Bearer " + tokenForTestUser)
+            .queryParam("longitude", ANY_LONGITUDE)
+            .queryParam("latitude", ANY_LATITUDE)
             .when()
             .get("/meals")
             .then()
@@ -252,6 +262,8 @@ class MealControllerIT {
     List<Meal> allAvailableMealsInRange =
         with()
             .header("Authorization", "Bearer " + tokenForTestUser)
+            .queryParam("longitude", "52")
+            .queryParam("latitude", "54")
             .when()
             .get("/meals")
             .then()
@@ -266,6 +278,16 @@ class MealControllerIT {
 
     deleteMealByIdViaApi(createdMealInRange.getId(), tokenForTestUser);
     deleteMealByIdViaApi(createdMealOutOfRange.getId(), tokenForTestUser);
+  }
+
+  @Test
+  void notSendingLocationDetailsResultsInABadRequestResponse() {
+    with()
+        .header("Authorization", "Bearer " + tokenForTestUser)
+        .when()
+        .get("/meals")
+        .then()
+        .statusCode(400);
   }
 
   private Meal createMealViaApi(Meal meal, String token) throws JsonProcessingException {
