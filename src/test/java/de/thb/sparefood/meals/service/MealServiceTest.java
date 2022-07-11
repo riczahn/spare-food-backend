@@ -70,7 +70,7 @@ class MealServiceTest {
 
   @Test
   void addingAMealCallsTheMealRepository() {
-    mealService.addMeal(anyMeal);
+    mealService.persist(anyMeal);
 
     verify(mealRepository, times(1)).persist(anyMeal);
   }
@@ -79,7 +79,7 @@ class MealServiceTest {
   void addingAMealWithoutANameThrowsAnException() {
     Meal mealWithoutName = new Meal();
 
-    assertThatThrownBy(() -> mealService.addMeal(mealWithoutName))
+    assertThatThrownBy(() -> mealService.persist(mealWithoutName))
         .isInstanceOf(InvalidParameterException.class);
   }
 
@@ -104,6 +104,6 @@ class MealServiceTest {
   void whenMealRepositoryThrowsAnExceptionItWillBePropagated() {
     doThrow(PersistenceException.class).when(mealRepository).persist((Meal) any());
 
-    assertThatThrownBy(() -> mealService.addMeal(anyMeal)).isInstanceOf(PersistenceException.class);
+    assertThatThrownBy(() -> mealService.persist(anyMeal)).isInstanceOf(PersistenceException.class);
   }
 }

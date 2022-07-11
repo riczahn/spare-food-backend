@@ -33,7 +33,7 @@ public class MealService {
   }
 
   @Transactional
-  public Meal addMeal(Meal meal) {
+  public Meal persist(Meal meal) {
     if (meal.getName() == null) {
       throw new InvalidParameterException("Missing value for property name");
     }

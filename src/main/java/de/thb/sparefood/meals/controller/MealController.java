@@ -1,23 +1,25 @@
 package de.thb.sparefood.meals.controller;
 
 import de.thb.sparefood.meals.exception.MealNotFoundException;
-import de.thb.sparefood.meals.model.FilterCriteria;
-import de.thb.sparefood.meals.model.Location;
-import de.thb.sparefood.meals.model.Meal;
-import de.thb.sparefood.meals.model.Property;
+import de.thb.sparefood.meals.model.*;
 import de.thb.sparefood.meals.service.ContextService;
 import de.thb.sparefood.meals.service.MealService;
+import de.thb.sparefood.meals.service.StorageService;
 import de.thb.sparefood.user.exception.MealCantBeReservedException;
 import de.thb.sparefood.user.model.User;
 import de.thb.sparefood.user.service.UserService;
+import io.smallrye.common.annotation.Blocking;
 import lombok.AllArgsConstructor;
+import org.jboss.resteasy.reactive.MultipartForm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
+import java.io.File;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +39,7 @@ public class MealController {
   @Inject MealService mealService;
   @Inject UserService userService;
   @Inject ContextService contextService;
+  @Inject StorageService storageService;
 
   @GET
   public Response getAllMeals(@Context UriInfo info) {
@@ -78,7 +81,7 @@ public class MealController {
       User user = contextService.getCurrentUser(context);
       meal.setCreator(user);
 
-      Meal createdMeal = mealService.addMeal(meal);
+      Meal createdMeal = mealService.persist(meal);
       return Response.ok().entity(createdMeal).build();
     } catch (InvalidParameterException e) {
       return Response.status(BAD_REQUEST).entity(e.getMessage()).build();
@@ -91,7 +94,8 @@ public class MealController {
   @PUT
   @Path("/{id}")
   @Consumes(APPLICATION_JSON)
-  public Response updateMeal(@PathParam("id") long id, Meal meal, @Context SecurityContext context) {
+  public Response updateMeal(
+      @PathParam("id") long id, Meal meal, @Context SecurityContext context) {
     try {
       User user = contextService.getCurrentUser(context);
       Meal updatedMeal = mealService.updateMeal(id, meal, user);
@@ -148,6 +152,68 @@ public class MealController {
     } catch (Exception e) {
       logger.error("Failed to release meal! %s", e);
       return Response.status(INTERNAL_SERVER_ERROR).build();
+    }
+  }
+
+  @POST
+  @Path("/{id}/image")
+  @Consumes(MediaType.MULTIPART_FORM_DATA)
+  @Produces(MediaType.TEXT_PLAIN)
+  @Blocking
+  @Transactional
+  public Response uploadImage(
+      @PathParam("id") long mealId,
+      @MultipartForm FileUploadForm data,
+      @Context SecurityContext context) {
+
+    Optional<Meal> optionalMeal = mealService.findMealById(mealId);
+    if (optionalMeal.isEmpty()) {
+      return Response.status(NOT_FOUND).build();
+    }
+    Meal meal = optionalMeal.get();
+
+    try {
+      User user = contextService.getCurrentUser(context);
+      if (!meal.getCreator().getEmail().equals(user.getEmail())) {
+        return Response.status(FORBIDDEN).build();
+      }
+
+      File file = data.getData();
+      String key = storageService.saveFile(file, String.valueOf(mealId));
+      meal.setPicturePath(key);
+      mealService.persist(meal);
+      return Response.ok().build();
+    } catch (Exception e) {
+      logger.error("Failed", e);
+      return Response.serverError().build();
+    }
+  }
+
+  @GET
+  @Path("/{id}/image")
+  @Produces("image/png")
+  public Response getImage(@PathParam("id") long mealId, @Context SecurityContext context) {
+    Optional<Meal> optionalMeal = mealService.findMealById(mealId);
+    if (optionalMeal.isEmpty()) {
+      return Response.status(NOT_FOUND).build();
+    }
+    Meal meal = optionalMeal.get();
+
+    if (meal.getPicturePath() == null) {
+      return Response.noContent().build();
+    }
+
+    try {
+      User user = contextService.getCurrentUser(context);
+      if (!meal.getCreator().getEmail().equals(user.getEmail())) {
+        return Response.status(FORBIDDEN).build();
+      }
+
+      byte[] file = storageService.getFileAsBytes(meal.getPicturePath());
+      return Response.ok().entity(file).build();
+    } catch (Exception e) {
+      logger.error("Failed", e);
+      return Response.serverError().build();
     }
   }
 

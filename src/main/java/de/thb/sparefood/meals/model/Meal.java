@@ -34,6 +34,8 @@ public class Meal {
   @ManyToOne(optional = false, fetch = FetchType.EAGER)
   private User creator;
 
+  private String picturePath;
+
   public Meal(String name, Location location) {
     this(name, null, location);
   }
@@ -58,5 +60,8 @@ public class Meal {
   public void adoptValuesFrom(Meal other) {
     this.setName(other.getName());
     this.setDescription(other.getDescription());
+    this.setProperties(other.getProperties());
+    this.setPicturePath(other.getPicturePath());
+    this.setLocation(other.getLocation());
   }
 }

@@ -29,7 +29,7 @@ class MealServiceIT {
   @TestTransaction
   void addingAMealPersistsIt() {
     int numberOfMeals = mealService.getAllMeals().size();
-    Meal createdMeal = mealService.addMeal(anyMeal);
+    Meal createdMeal = mealService.persist(anyMeal);
 
     List<Meal> availableMeals = mealService.getAllMeals();
     assertThat(availableMeals).hasSize(numberOfMeals + 1).contains(createdMeal);
@@ -38,7 +38,7 @@ class MealServiceIT {
   @Test
   @TestTransaction
   void updatingAMealKeepsTheIdButUpdatesAllOtherProperties() throws MealNotFoundException {
-    Meal createdMeal = mealService.addMeal(anyMeal);
+    Meal createdMeal = mealService.persist(anyMeal);
     createdMeal.setName("updated name");
     createdMeal.setDescription("any description");
 
@@ -49,7 +49,7 @@ class MealServiceIT {
   @Test
   @TestTransaction
   void tryingToUpdateAMealOfAnotherUserThrowsException() {
-    Meal createdMeal = mealService.addMeal(anyMeal);
+    Meal createdMeal = mealService.persist(anyMeal);
     createdMeal.setName("updated name");
     createdMeal.setDescription("any description");
     Long id = createdMeal.getId();
@@ -63,7 +63,7 @@ class MealServiceIT {
   @TestTransaction
   void removingAMealDeletesIt() {
     List<Meal> mealsBeforeTest = mealService.getAllMeals();
-    Meal createdMeal = mealService.addMeal(anyMeal);
+    Meal createdMeal = mealService.persist(anyMeal);
 
     mealService.removeMeal(createdMeal.getId());
 
