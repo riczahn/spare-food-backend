@@ -34,6 +34,7 @@ public class Meal {
   @ManyToOne(optional = false, fetch = FetchType.EAGER)
   private User creator;
 
+  @JsonIgnore
   private String picturePath;
 
   public Meal(String name, Location location) {
