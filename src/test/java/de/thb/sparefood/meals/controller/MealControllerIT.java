@@ -49,7 +49,7 @@ class MealControllerIT {
     this.tokenForTestUser =
         tokenUtils.generateToken(new BasicAuthDTO("testuser@test.de", "password"));
     this.tokenForADifferentUser =
-        tokenUtils.generateToken(new BasicAuthDTO("anotherUser@test.de", "password"));
+        tokenUtils.generateToken(new BasicAuthDTO("anothertestuser@test.de", "password"));
     this.anyMeal = new Meal("any meal", ANY_LOCATION_IN_RANGE);
   }
 
@@ -159,7 +159,7 @@ class MealControllerIT {
 
     List<Meal> actualAvailableMeals =
         with()
-            .header("Authorization", "Bearer " + tokenForTestUser)
+            .header("Authorization", "Bearer " + tokenForADifferentUser)
             .queryParam("longitude", ANY_LONGITUDE)
             .queryParam("latitude", ANY_LATITUDE)
             .queryParam("filter.radius", ANY_SEARCH_RADIUS)
@@ -194,7 +194,7 @@ class MealControllerIT {
 
     List<Meal> allVegetarianMeals =
         with()
-            .header("Authorization", "Bearer " + tokenForTestUser)
+            .header("Authorization", "Bearer " + tokenForADifferentUser)
             .queryParam("filter.property", "vegetarian")
             .queryParam("filter.property", "vegan")
             .queryParam("longitude", ANY_LONGITUDE)
@@ -270,7 +270,7 @@ class MealControllerIT {
 
     List<Meal> allAvailableMealsInRange =
         with()
-            .header("Authorization", "Bearer " + tokenForTestUser)
+            .header("Authorization", "Bearer " + tokenForADifferentUser)
             .queryParam("longitude", ANY_LONGITUDE)
             .queryParam("latitude", ANY_LATITUDE)
             .queryParam("filter.radius", ANY_SEARCH_RADIUS)

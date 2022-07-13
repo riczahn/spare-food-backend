@@ -20,6 +20,7 @@ import javax.transaction.Transactional;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import java.io.File;
+import java.nio.file.attribute.UserPrincipalNotFoundException;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +43,7 @@ public class MealController {
   @Inject StorageService storageService;
 
   @GET
-  public Response getAllMeals(@Context UriInfo info) {
+  public Response getAllMeals(@Context UriInfo info, @Context SecurityContext context) {
     MultivaluedMap<String, String> queryParameters = info.getQueryParameters();
 
     FilterCriteria filterCriteria;
@@ -53,8 +54,14 @@ public class MealController {
       return Response.status(BAD_REQUEST).entity(e.getMessage()).build();
     }
 
-    List<Meal> availableMeals = mealService.getAllMeals(filterCriteria);
-    return Response.ok().entity(availableMeals).build();
+    try {
+      User user = contextService.getCurrentUser(context);
+      List<Meal> availableMeals = mealService.getAllMeals(filterCriteria, user);
+      return Response.ok().entity(availableMeals).build();
+    } catch (UserPrincipalNotFoundException e) {
+      logger.error("Failed to get all meals!", e);
+      return Response.serverError().build();
+    }
   }
 
   @GET

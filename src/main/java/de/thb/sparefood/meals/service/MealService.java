@@ -28,8 +28,8 @@ public class MealService {
     return mealRepository.listAll();
   }
 
-  public List<Meal> getAllMeals(FilterCriteria filterCriteria) {
-    return mealRepository.findAllMealsWithProperties(filterCriteria);
+  public List<Meal> getAllMeals(FilterCriteria filterCriteria, User requestingUser) {
+    return mealRepository.findAllMealsWithProperties(filterCriteria, requestingUser);
   }
 
   @Transactional

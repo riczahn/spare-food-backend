@@ -5,6 +5,7 @@ import de.thb.sparefood.meals.model.Location;
 import de.thb.sparefood.meals.model.Meal;
 import de.thb.sparefood.meals.model.Property;
 import de.thb.sparefood.meals.service.LocationDistanceService;
+import de.thb.sparefood.user.model.User;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -17,7 +18,7 @@ public class MealRepository implements PanacheRepository<Meal> {
 
   @Inject LocationDistanceService locationDistanceService;
 
-  public List<Meal> findAllMealsWithProperties(FilterCriteria filterCriteria) {
+  public List<Meal> findAllMealsWithProperties(FilterCriteria filterCriteria, User requestingUser) {
     StringBuilder query = new StringBuilder("SELECT m.* FROM meal m");
 
     int i = 0;
@@ -35,7 +36,12 @@ public class MealRepository implements PanacheRepository<Meal> {
       i++;
     }
 
-    query.append(" WHERE m.reservinguser_email IS NULL");
+    // return only available meals that were not created by the requesting user
+    query
+        .append(" WHERE m.reservinguser_email IS NULL")
+        .append(" AND m.creator_email != '")
+        .append(requestingUser.getEmail())
+        .append("'");
 
     List<Meal> allMealsWithRequiredProperties =
         getEntityManager().createNativeQuery(query.toString(), Meal.class).getResultList();
