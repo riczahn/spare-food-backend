@@ -34,8 +34,7 @@ public class Meal {
   @ManyToOne(optional = false, fetch = FetchType.EAGER)
   private User creator;
 
-  @JsonIgnore
-  private String picturePath;
+  @JsonIgnore private String picturePath;
 
   public Meal(String name, Location location) {
     this(name, null, location);
@@ -50,12 +49,12 @@ public class Meal {
   }
 
   public Meal(
-      String name, String description, Set<Property> properties, User user, Location location) {
-    this.name = name;
-    this.description = description;
-    this.properties = properties;
-    this.creator = user;
-    this.location = location;
+      String name, String description, Set<Property> properties, User creator, Location location) {
+    this.setName(name);
+    this.setDescription(description);
+    this.setProperties(properties);
+    this.setCreator(creator);
+    this.setLocation(location);
   }
 
   public void adoptValuesFrom(Meal other) {

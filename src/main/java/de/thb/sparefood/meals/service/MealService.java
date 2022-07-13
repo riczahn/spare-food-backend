@@ -64,7 +64,7 @@ public class MealService {
     }
 
     toBeUpdatedMeal.adoptValuesFrom(newMeal);
-    mealRepository.persist(toBeUpdatedMeal);
+    mealRepository.getEntityManager().merge(toBeUpdatedMeal);
 
     return toBeUpdatedMeal;
   }

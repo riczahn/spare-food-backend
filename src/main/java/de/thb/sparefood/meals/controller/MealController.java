@@ -94,6 +94,7 @@ public class MealController {
   @PUT
   @Path("/{id}")
   @Consumes(APPLICATION_JSON)
+  @Transactional
   public Response updateMeal(
       @PathParam("id") long id, Meal meal, @Context SecurityContext context) {
     try {
