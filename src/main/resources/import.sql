@@ -24,6 +24,6 @@ VALUES (1000, 'NO_FISH');
 INSERT INTO meal_properties(meal_id, properties)
 VALUES (1001, 'VEGETARIAN');
 INSERT INTO meal_properties(meal_id, properties)
-VALUES (1001, 'NUTS');
+VALUES (1001, 'NO_NUTS');
 INSERT INTO meal_properties(meal_id, properties)
-VALUES (1002, 'GLUTEN_FREE');
+VALUES (1002, 'NO_WHEAT');
