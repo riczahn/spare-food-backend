@@ -212,11 +212,6 @@ public class MealController {
     }
 
     try {
-      User user = contextService.getCurrentUser(context);
-      if (!meal.getCreator().getEmail().equals(user.getEmail())) {
-        return Response.status(FORBIDDEN).build();
-      }
-
       byte[] file = storageService.getFileAsBytes(meal.getPicturePath());
       return Response.ok().entity(file).build();
     } catch (Exception e) {
