@@ -3,6 +3,7 @@ VALUES ('testuser@test.de', 'Test', 'Testuser', 'password'),
        ('anothertestuser@test.de', 'Test', 'Testuser2', 'password'),
        ('trompell@th-brandenburg.de', 'Tobias', 'Trompell', 'password'),
        ('luedrick@th-brandenburg.de', 'Rick', 'Lüdicke', 'password'),
+       ('mck@th-brandenburg.de', 'Martin', 'Kindsmüller', 'password'),
        ('zahn@th-brandenburg.de', 'Richard', 'Zahn', 'password');
 
 /*
