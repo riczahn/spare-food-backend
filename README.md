@@ -4,7 +4,7 @@ The backend for the SpareFood Application developed at the University of Applied
 ## How to run:
 1. Install PostgreSQL
 2. Adjust the user credentials and database name in the application.properties file to your needs
-3. Run `./mvnw quarkus:dev`
+3. Run `./mvnw quarkus:dev` or on some linux systems `./mvnw sh quarkus:dev` or on windows `mvnw quarkus:dev`
 4. Enjoy
 
 ## Things worth mentioning
