@@ -110,6 +110,13 @@
             <scope>compile</scope>
         </dependency>
 
+        <!-- Docker -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-container-image-jib</artifactId>
+            <version>2.10.2.Final</version>
+        </dependency>
+
         <!-- Testing -->
         <dependency>
             <groupId>io.quarkus</groupId>
