@@ -2,9 +2,9 @@ package de.thb.sparefood.user.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.thb.sparefood.PostgresResource;
 import de.thb.sparefood.user.model.User;
 import io.quarkus.test.common.QuarkusTestResource;
+import io.quarkus.test.h2.H2DatabaseTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
 
@@ -13,7 +13,7 @@ import static io.restassured.RestAssured.when;
 import static org.hamcrest.Matchers.is;
 
 @QuarkusTest
-@QuarkusTestResource(PostgresResource.class)
+@QuarkusTestResource(H2DatabaseTestResource.class)
 class UserControllerIT {
 
   private final ObjectMapper objectMapper = new ObjectMapper();

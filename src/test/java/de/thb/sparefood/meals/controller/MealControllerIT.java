@@ -2,7 +2,6 @@ package de.thb.sparefood.meals.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.thb.sparefood.PostgresResource;
 import de.thb.sparefood.auth.model.BasicAuthDTO;
 import de.thb.sparefood.auth.token.TokenUtils;
 import de.thb.sparefood.meals.model.Location;
@@ -18,6 +17,7 @@ import org.mockito.Mockito;
 
 import java.util.List;
 import java.util.Set;
+import io.quarkus.test.h2.H2DatabaseTestResource;
 
 import static io.restassured.RestAssured.with;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -26,7 +26,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 
 @QuarkusTest
-@QuarkusTestResource(PostgresResource.class)
+@QuarkusTestResource(H2DatabaseTestResource.class)
 class MealControllerIT {
 
   private static final Double ANY_SEARCH_RADIUS = 1.0;

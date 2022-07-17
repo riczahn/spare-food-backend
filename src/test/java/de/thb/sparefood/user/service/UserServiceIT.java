@@ -1,10 +1,10 @@
 package de.thb.sparefood.user.service;
 
-import de.thb.sparefood.PostgresResource;
 import de.thb.sparefood.user.exception.UnknownUserException;
 import de.thb.sparefood.user.model.User;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.common.QuarkusTestResource;
+import io.quarkus.test.h2.H2DatabaseTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
 
@@ -14,7 +14,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @QuarkusTest
-@QuarkusTestResource(PostgresResource.class)
+@QuarkusTestResource(H2DatabaseTestResource.class)
 class UserServiceIT {
 
   @Inject UserService userService;

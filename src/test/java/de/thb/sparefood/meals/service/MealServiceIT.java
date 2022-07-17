@@ -1,12 +1,12 @@
 package de.thb.sparefood.meals.service;
 
-import de.thb.sparefood.PostgresResource;
 import de.thb.sparefood.meals.exception.MealNotFoundException;
 import de.thb.sparefood.meals.model.Location;
 import de.thb.sparefood.meals.model.Meal;
 import de.thb.sparefood.user.model.User;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.common.QuarkusTestResource;
+import io.quarkus.test.h2.H2DatabaseTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
 
@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @QuarkusTest
-@QuarkusTestResource(PostgresResource.class)
+@QuarkusTestResource(H2DatabaseTestResource.class)
 class MealServiceIT {
 
   @Inject MealService mealService;
