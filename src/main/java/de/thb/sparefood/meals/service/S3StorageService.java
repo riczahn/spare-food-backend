@@ -18,12 +18,12 @@ import java.net.URI;
 @ApplicationScoped
 public class S3StorageService implements StorageService {
   private static final String FILE_SERVER = "https://s3.hidrive.strato.com";
-  private static final String S3_BUCKET_NAME = "images-mux";
+  private static final String S3_BUCKET_NAME = "new-images-mux";
 
   private static final StaticCredentialsProvider CREDENTIALS_PROVIDER =
       StaticCredentialsProvider.create(
           AwsBasicCredentials.create(
-              "AHS4GQ7B4DRUATRS5Q2O", "R1xmlDPCSWV66pjrJHL2hHWUqdYDma5lp+DM6/qq"));
+              "AHS4P55K1AB4554IYZ6N", "Aacx+gb1bcRHausETo8Nc4wh0dREoYfljLVQJl18"));
 
   private static final S3Client S3_CLIENT =
       S3Client.builder()
