@@ -23,7 +23,7 @@ public class S3StorageService implements StorageService {
   private static final StaticCredentialsProvider CREDENTIALS_PROVIDER =
       StaticCredentialsProvider.create(
           AwsBasicCredentials.create(
-              "AHS4GQ7B4DRUATRS5Q2O", "R1xmlDPCSWV66pjrJHL2hHWUqdYDma5lp+DM6/qq"));
+              "[redacted]", "[redacted]"));
 
   private static final S3Client S3_CLIENT =
       S3Client.builder()
